@@ -159,6 +159,8 @@ export const translations = {
   joinGroupError: 'Fehler beim Beitreten der Gruppe',
   shareProfilePicture: 'Profilbild in Gruppe teilen',
   shareProfilePictureDesc: 'Dein Profilbild wird anderen Gruppenmitgliedern angezeigt',
+  weatherCity: 'Wetter-Stadt',
+  weatherCityLabel: 'Stadt für Wetterdaten auswählen:',
     },
     // Onboarding
     onboarding: {
@@ -357,6 +359,8 @@ export const translations = {
   joinGroupError: 'Error joining group',
   shareProfilePicture: 'Share profile picture in group',
   shareProfilePictureDesc: 'Your profile picture will be visible to other group members',
+  weatherCity: 'Weather City',
+  weatherCityLabel: 'Select city for weather data:',
     },
     // Onboarding
     onboarding: {

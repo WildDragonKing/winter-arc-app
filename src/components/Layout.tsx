@@ -1,65 +1,59 @@
 import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { BottomNav } from './navigation/BottomNav';
-import { QuickLogFAB } from './navigation/QuickLogFAB';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-/**
- * Main Layout Component
- *
- * Mobile-first layout with bottom navigation and FAB
- * Screen transitions with framer-motion
- * Respects prefers-reduced-motion
- */
 function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { t } = useTranslation();
 
-  // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Page transition variants
-  const pageVariants = {
-    initial: {
-      opacity: prefersReducedMotion ? 1 : 0,
-      y: prefersReducedMotion ? 0 : 20,
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-    },
-    exit: {
-      opacity: prefersReducedMotion ? 1 : 0,
-      y: prefersReducedMotion ? 0 : -20,
-    },
-  };
+  const navItems = [
+    { path: '/', labelKey: 'nav.dashboard', icon: '🏠' },
+    { path: '/leaderboard', labelKey: 'nav.group', icon: '👥' },
+    { path: '/settings', labelKey: 'nav.settings', icon: '⚙️' },
+  ];
 
   return (
-    <div className="flex flex-col min-h-screen-mobile app-bg">
+    <div className="flex flex-col h-screen">
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-24">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+      <main
+        key={location.pathname}
+        className="flex-1 overflow-y-auto pb-20 md:pb-24 transition-opacity duration-200"
+      >
+        <div className="animate-fade-in-up">{children}</div>
       </main>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
-
-      {/* Floating Action Button */}
-      <QuickLogFAB />
+      {/* Floating Bottom Navigation - Glassmorphism Style */}
+      <nav className="fixed left-1/2 -translate-x-1/2 bottom-5 z-50">
+        <div className="flex items-center justify-center gap-4 animate-fade-in-up delay-400">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`touchable flex items-center justify-center w-12 h-12 rounded-[18px] transition-all duration-200 ${
+                  isActive
+                    ? 'bg-gradient-to-b from-violet-600/40 to-blue-500/40 text-blue-100 shadow-[0_8px_24px_rgba(59,130,246,0.45)]'
+                    : 'text-blue-100/70 hover:bg-white/10'
+                }`}
+                aria-label={t(item.labelKey)}
+              >
+                <span
+                  className={`text-2xl flex items-center justify-center transition-transform duration-200 ${
+                    isActive ? 'scale-110' : ''
+                  }`}
+                >
+                  {item.icon}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
