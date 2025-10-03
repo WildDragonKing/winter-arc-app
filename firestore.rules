@@ -48,5 +48,11 @@ service cloud.firestore {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId);
     }
+
+    // AI Quotes collection - users can only read/write their own AI-generated quotes
+    match /aiQuotes/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
   }
 }
