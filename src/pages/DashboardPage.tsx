@@ -123,20 +123,6 @@ function DashboardPage() {
                   <span>{weather.temperature}°C</span>
                 </div>
               )}
-              <Link
-                to="/tracking/history"
-                className="glass-dark px-3 py-2 hover:bg-white/10 hover:dark:bg-white/10 rounded-lg transition-colors text-xl flex items-center justify-center"
-                title={t('tracking.history')}
-              >
-                📋
-              </Link>
-              <Link
-                to="/settings"
-                className="glass-dark px-3 py-2 hover:bg-white/10 hover:dark:bg-white/10 rounded-lg transition-colors text-xl flex items-center justify-center"
-                title={t('nav.settings')}
-              >
-                ⚙️
-              </Link>
             </div>
           </div>
           {/* AI Motivation Quote */}
@@ -151,7 +137,7 @@ function DashboardPage() {
                   </div>
                 ) : motivation ? (
                   <>
-                    <div className="text-lg whitespace-pre-line mb-1">
+                    <div className="text-lg whitespace-pre-line mb-1 line-clamp-2">
                       {motivation.quote}
                     </div>
                     {motivation.subtext && (
@@ -190,7 +176,7 @@ function DashboardPage() {
   </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 pb-20 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 pb-20 space-y-6 pt-4">
         {/* Week Overview */}
         <div className="animate-fade-in-up delay-100">
           <WeekOverview />
@@ -198,19 +184,19 @@ function DashboardPage() {
 
         {/* Tracking Tiles */}
         <div className="space-y-4 animate-fade-in-up delay-300">
-          {/* Pushups & Sport Side by Side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Pushups & Sport Side by Side - 2 columns on mobile */}
+          <div className="grid grid-cols-2 gap-3">
             <PushupTile />
             <SportTile />
           </div>
 
-          {/* Water & Protein Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Water & Protein Grid - 2 columns on mobile */}
+          <div className="grid grid-cols-2 gap-3">
             <WaterTile />
             <ProteinTile />
           </div>
 
-          {/* Weight */}
+          {/* Weight - full width */}
           <WeightTile />
         </div>
       </div>

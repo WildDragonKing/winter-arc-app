@@ -52,26 +52,19 @@ function SportTile() {
   const completedCount = Object.values(currentSports).filter(Boolean).length;
 
   return (
-    <div className="glass-dark touchable p-6 text-white">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="text-3xl">🏃</div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t('tracking.sport')}
-          </h3>
+    <div className="glass-dark touchable p-3 text-white">
+      <div className="flex flex-col items-center mb-2">
+        <div className="text-xl mb-1">🏃</div>
+        <div className="text-2xl font-bold text-winter-600 dark:text-winter-400">
+          {completedCount}
         </div>
-        <div className="text-right">
-          <div className="text-3xl font-bold text-winter-600 dark:text-winter-400">
-            {completedCount}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {displayDayLabel}
-          </div>
-        </div>
+        <h3 className="text-xs font-medium text-gray-600 dark:text-gray-400">
+          {t('tracking.sport')}
+        </h3>
       </div>
 
-      {/* Sport Options Grid - Compact 3x2 */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Sport Options Grid - Compact 3x2, smaller icons with labels */}
+      <div className="grid grid-cols-3 gap-1.5">
         {sportOptions.map((sport) => {
           const isChecked = currentSports[sport.key] || false;
 
@@ -80,15 +73,18 @@ function SportTile() {
               key={sport.key}
               type="button"
               onClick={() => toggleSport(sport.key)}
-              className={`p-3 rounded-xl transition-all flex items-center justify-center ${
+              className={`p-2 rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
                 isChecked
                   ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500 dark:border-green-400'
                   : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
               }`}
               title={sport.label}
             >
-              <div className="text-2xl">
+              <div className="text-xl">
                 {sport.icon}
+              </div>
+              <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                {sport.label}
               </div>
             </button>
           );

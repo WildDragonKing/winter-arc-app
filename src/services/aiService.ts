@@ -116,52 +116,31 @@ export async function generateDailyMotivation(
       }
     }
 
-    const prompt = `Du bist ein motivierender Fitness-Coach für die \"Winter Arc Challenge\".
-Schreibe jeden Tag einen kurzen, klaren 3–8-Zeiler auf Deutsch für den Nutzer.
-Sprache: direkt, ermutigend, mit natürlichem Fluss – keine Aufzählungen, keine Stichpunkte, keine Emojis.
-Ton: ernsthaft motivierend, ohne Pathos, mit Bezug auf Disziplin und Ausdauer im Winter-Arc-Thema.
+    const prompt = `Schreibe eine kurze, motivierende Nachricht in maximal 2 Zeilen, basierend auf Streak, heutigen Aufgaben und Protein/Wasser-Fortschritt. Direkt, positiv, ohne Floskeln.
 
-WICHTIG: Verwende KEINEN Fettdruck, keine Markierungen, keine Sonderformatierung. Schreibe nur normalen Text.
-Wenn sinnvoll, setze Absätze (Leerzeile) für Übersichtlichkeit.
-
-Daten, die du erhältst:
+Daten:
 ${JSON.stringify({
   nickname,
   weatherContext: weatherInfo,
   stats: {
     currentStreak: stats.currentStreak,
-    totalPushups: stats.totalPushups,
-    sportSessions: stats.sportSessions,
+    completedToday: stats.completedToday,
     avgWater: Math.round(stats.avgWater),
     avgProtein: Math.round(stats.avgProtein),
-    completedToday: stats.completedToday,
     today: todayReps ? { reps: todayReps } : undefined,
-    rest: false
   },
   timeContext: isoDatetime,
-  feedbackHistory // z.B. [{date, quote, feedback: 'up'|'down'}]
 }, null, 2)}
 
-Logik:
-- Bestimme aus der Uhrzeit, ob es Morgen (05–10 Uhr), Mittag (11–16 Uhr) oder Abend (17–23 Uhr) ist.
-- Passe den Text an die Tageszeit an:
-  - Morgen: Aufbruch, Energie, Zielsetzung.
-  - Mittag: Dranbleiben, Zwischenbilanz, Korrektur (z. B. mehr trinken, Protein snacken).
-  - Abend: Bilanz, Disziplin sichern, evtl. kleiner Finisher.
-- Nutze die Stats für personalisierte Hinweise:
-  - Streak hoch → Stolz betonen, Momentum halten.
-  - Streak niedrig → Neubeginn betonen, Motivation aufbauen.
-  - completedToday = false → kleinstes lieferbares Ergebnis vorschlagen (z. B. 1 Satz).
-  - avgWater < 2000 → erinnere ans Trinken.
-  - avgProtein < 120 → erinnere an Protein.
-  - Rest = true → Fokus auf Regeneration.
-- Wetter nur kurz einbauen (z. B. kühle Luft, klare Gedanken).
-- Schreibe in einem natürlichen Fluss, nicht stichpunktartig.
-
-Berücksichtige das FeedbackHistory-Array: Wenn mehrere Daumen runter in Folge, ändere Stil oder Inhalt, um besser zu motivieren. Bei Daumen hoch, halte den Stil ähnlich.
+Anweisungen:
+- Maximal 2 Zeilen, kurz und prägnant
+- Keine Emojis, kein Fettdruck, keine Aufzählungen
+- Beziehe Streak, heutige Aufgaben (completedToday), Wasser/Protein ein
+- Direkt und motivierend
+- Auf Deutsch
 
 Ausgabe:
-Nur den 3–8-Zeiler im Plaintext, keine JSON-Hülle. Kein Fettdruck, keine Markierung. Absätze (Leerzeile) sind erlaubt, wenn sinnvoll.`;
+Nur der Text, maximal 2 Zeilen.`;
 
     // Prompt an Google Generative AI senden
     // Nur Gemini 2.5 Flash verwenden

@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import type { User, DailyTracking } from '../types';
 
@@ -241,5 +241,50 @@ export async function getGroupMembers(groupCode: string, startDate?: Date, endDa
   } catch (error) {
     console.error('Error getting group members:', error);
     return { success: false, error };
+  }
+}
+
+// Weekly Top 3 Achievement System
+interface WeeklySnapshot {
+  groupCode: string;
+  weekStart: string; // ISO date string for Monday of the week
+  top3UserIds: string[];
+  createdAt: string;
+}
+
+export async function saveWeeklyTop3(groupCode: string, weekStart: string, top3UserIds: string[]) {
+  try {
+    const snapshotRef = doc(db, 'weeklyTop3', `${groupCode}_${weekStart}`);
+    const snapshot: WeeklySnapshot = {
+      groupCode,
+      weekStart,
+      top3UserIds,
+      createdAt: new Date().toISOString(),
+    };
+    await setDoc(snapshotRef, snapshot);
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving weekly top 3:', error);
+    return { success: false, error };
+  }
+}
+
+export async function checkUserInTop3(userId: string, groupCode: string): Promise<boolean> {
+  try {
+    // Query all snapshots for this group where user is in top 3
+    const snapshotsRef = collection(db, 'weeklyTop3');
+    const q = query(
+      snapshotsRef,
+      where('groupCode', '==', groupCode),
+      where('top3UserIds', 'array-contains', userId),
+      orderBy('weekStart', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  } catch (error) {
+    console.error('Error checking top 3 status:', error);
+    return false;
   }
 }

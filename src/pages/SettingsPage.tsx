@@ -232,7 +232,7 @@ function SettingsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 -mt-4 pb-20 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 pt-4 pb-20 space-y-4">
         {/* Profile Section */}
         <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-6">
           <div className="flex items-center gap-4 mb-6">
@@ -293,6 +293,7 @@ function SettingsPage() {
                   type="text"
                   value={editNickname}
                   onChange={(e) => setEditNickname(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -304,6 +305,7 @@ function SettingsPage() {
                   type="number"
                   value={editHeight}
                   onChange={(e) => setEditHeight(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -315,6 +317,7 @@ function SettingsPage() {
                   type="number"
                   value={editWeight}
                   onChange={(e) => setEditWeight(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -327,6 +330,7 @@ function SettingsPage() {
                   step="0.1"
                   value={editBodyFat}
                   onChange={(e) => setEditBodyFat(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -338,6 +342,7 @@ function SettingsPage() {
                   type="number"
                   value={editMaxPushups}
                   onChange={(e) => setEditMaxPushups(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -439,6 +444,7 @@ function SettingsPage() {
                 type="text"
                 value={groupCode}
                 onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === 'Enter' && groupCode && handleJoinGroup()}
                 placeholder={t('settings.groupCodePlaceholder')}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-winter-500 outline-none font-mono"
                 autoFocus

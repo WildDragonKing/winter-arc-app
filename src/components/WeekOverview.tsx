@@ -34,7 +34,8 @@ function WeekOverview() {
     const hasWeight = !!dayTracking?.weight?.value; // Weight entered
 
     const tasksCompleted = [hasPushups, hasSports, hasWater, hasProtein, hasWeight].filter(Boolean).length;
-    const isCompleted = tasksCompleted >= 4; // At least 4 tasks for streak
+    const isCompleted = tasksCompleted >= 3; // At least 3 tasks for streak
+    const isPartial = tasksCompleted > 0 && tasksCompleted < 3; // Some tasks done but not enough
 
     return {
       date,
@@ -43,6 +44,7 @@ function WeekOverview() {
       dayNumber: format(date, 'd'),
       isToday,
       isCompleted,
+      isPartial,
       isSelected,
       hasPushups,
       hasSports,
@@ -80,19 +82,25 @@ function WeekOverview() {
       </div>
 
       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400 text-center">
-        {t('dashboard.streakInfo')} (4/5 {t('dashboard.tasks')})
+        {t('dashboard.streakInfo')} (3/5 {t('dashboard.tasks')})
       </div>
 
       {/* Week Days Grid */}
       <div className="grid grid-cols-7 gap-2">
         {weekDays.map((day) => {
-          let containerClasses = 'flex flex-col items-center p-2 rounded-lg transition-all border cursor-pointer';
-          if (day.isSelected) {
-            containerClasses += ' border-winter-500 dark:border-winter-400 bg-winter-100 dark:bg-winter-900 ring-2 ring-winter-500';
-          } else if (day.isCompleted) {
-            containerClasses += ' border-transparent bg-green-50 dark:bg-green-900/20';
+          // Circle styling based on status
+          let circleClasses = 'h-10 w-10 rounded-full flex items-center justify-center font-bold transition-all cursor-pointer';
+
+          if (day.isCompleted) {
+            circleClasses += ' bg-emerald-500 text-white shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]';
+          } else if (day.isPartial) {
+            circleClasses += ' ring-2 ring-amber-400 text-amber-200 bg-slate-700/40';
           } else {
-            containerClasses += ' border-transparent bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600';
+            circleClasses += ' bg-slate-700/40 text-slate-400';
+          }
+
+          if (day.isToday) {
+            circleClasses += ' ring-2 ring-sky-400';
           }
 
           return (
@@ -100,38 +108,14 @@ function WeekOverview() {
               key={day.dateStr}
               type="button"
               onClick={() => setSelectedDate(day.dateStr)}
-              className={containerClasses}
+              className="flex flex-col items-center gap-1"
             >
-              <span
-                className={`text-xs font-medium mb-1 ${
-                  day.isSelected
-                    ? 'text-winter-700 dark:text-winter-300'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 {day.dayName}
               </span>
-              <div className={`text-lg font-bold mb-1 ${
-                day.isSelected
-                  ? 'text-winter-600 dark:text-winter-400'
-                  : 'text-gray-900 dark:text-white'
-              }`}>
+              <div className={circleClasses}>
                 {day.dayNumber}
               </div>
-
-              {/* Task indicators */}
-              <div className="flex gap-0.5 mt-1">
-                <div className={`w-1.5 h-1.5 rounded-full ${day.hasPushups ? 'bg-winter-500' : 'bg-gray-300 dark:bg-gray-600'}`} title="Pushups" />
-                <div className={`w-1.5 h-1.5 rounded-full ${day.hasSports ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'}`} title="Sport" />
-                <div className={`w-1.5 h-1.5 rounded-full ${day.hasWater ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`} title="Water" />
-                <div className={`w-1.5 h-1.5 rounded-full ${day.hasProtein ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`} title="Protein" />
-                <div className={`w-1.5 h-1.5 rounded-full ${day.hasWeight ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'}`} title="Weight" />
-              </div>
-
-              {/* Streak indicator */}
-              {day.isCompleted && (
-                <div className="text-xs mt-1">🔥</div>
-              )}
             </button>
           );
         })}

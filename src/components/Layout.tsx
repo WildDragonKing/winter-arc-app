@@ -11,8 +11,9 @@ function Layout({ children }: LayoutProps) {
   const { t } = useTranslation();
 
   const navItems = [
-    { path: '/', labelKey: 'nav.dashboard', icon: '\ud83c\udfe0' },
-    { path: '/leaderboard', labelKey: 'nav.group', icon: '\ud83d\udc65' },
+    { path: '/', labelKey: 'nav.dashboard', icon: '🏠' },
+    { path: '/leaderboard', labelKey: 'nav.group', icon: '👥' },
+    { path: '/settings', labelKey: 'nav.settings', icon: '⚙️' },
   ];
 
   return (

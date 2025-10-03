@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
-import { getGroupMembers } from '../services/firestoreService';
+import { getGroupMembers, checkUserInTop3 } from '../services/firestoreService';
 import { calculateStreak } from '../utils/calculations';
 import { useTranslation } from '../hooks/useTranslation';
+import { useWeeklyTop3 } from '../hooks/useWeeklyTop3';
 
 function LeaderboardPage() {
   const { t, language } = useTranslation();
@@ -12,10 +13,14 @@ function LeaderboardPage() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isTop3, setIsTop3] = useState(false);
 
   const user = useStore((state) => state.user);
   const tracking = useStore((state) => state.tracking);
   const locale = language === 'de' ? de : enUS;
+
+  // Check weekly Top 3 snapshots
+  useWeeklyTop3();
 
   // Calculate current user stats
   const userStats = useMemo(() => {
@@ -79,6 +84,16 @@ function LeaderboardPage() {
     loadLeaderboard();
   }, [user?.groupCode, filter]);
 
+  // Check if current user is in Top 3
+  useEffect(() => {
+    const checkTop3Status = async () => {
+      if (!user?.id || !user?.groupCode) return;
+      const inTop3 = await checkUserInTop3(user.id, user.groupCode);
+      setIsTop3(inTop3);
+    };
+    checkTop3Status();
+  }, [user?.id, user?.groupCode]);
+
   // Sort leaderboard data
   const sortedLeaderboardData = useMemo(() => {
     if (!leaderboardData.length) return [];
@@ -129,7 +144,7 @@ function LeaderboardPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 -mt-4 pb-20 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 pt-4 pb-20 space-y-4">
         {/* Filter Tabs */}
         <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-2 flex gap-2">
           {[
@@ -151,77 +166,79 @@ function LeaderboardPage() {
           ))}
         </div>
 
-        {/* Week Heatmap - Only show in week view */}
-        {filter === 'week' && (
+        {/* 2-Column Layout: Heatmap left, Rankings right (on md+) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Left: Heatmap */}
+          <div>
+            {/* Week Heatmap - Only show in week view */}
+            {filter === 'week' && (
           <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-3">
             <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-2">
               {t('group.trainingWeek')} ({t('group.weekNumber')} {format(now, 'ww', { locale })})
             </h2>
             <div className="grid grid-cols-7 gap-2">
-              {daysInWeek.map((day) => {
+              {daysInWeek.map((day, idx) => {
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const dayTracking = tracking[dateStr];
                 const isCurrentDay = isToday(day);
+
                 // Calculate progress percentage
                 const pushups = dayTracking?.pushups?.total || 0;
                 const sports = Object.values(dayTracking?.sports || {}).filter(Boolean).length;
                 const water = dayTracking?.water || 0;
                 const protein = dayTracking?.protein || 0;
                 const weight = dayTracking?.weight?.value || 0;
-                const progress = (
-                  (pushups > 0 ? 20 : 0) +
-                  (sports > 0 ? 20 : 0) +
-                  (water >= 2000 ? 20 : 0) +
-                  (protein >= 100 ? 20 : 0) +
-                  (weight > 0 ? 20 : 0)
-                );
+                const tasksCompleted = [
+                  pushups > 0,
+                  sports > 0,
+                  water >= 2000,
+                  protein >= 100,
+                  weight > 0
+                ].filter(Boolean).length;
+
+                // Status: full (3-5), partial (1-2), empty (0)
+                const isFull = tasksCompleted >= 3;
+                const isPartial = tasksCompleted > 0 && tasksCompleted < 3;
+                const isEmpty = tasksCompleted === 0;
+
+                // Check if previous day is also complete for streak connection
+                const prevDay = idx > 0 ? daysInWeek[idx - 1] : null;
+                const prevDateStr = prevDay ? format(prevDay, 'yyyy-MM-dd') : '';
+                const prevTracking = prevDateStr ? tracking[prevDateStr] : null;
+                const prevTasksCompleted = prevTracking ? [
+                  (prevTracking.pushups?.total || 0) > 0,
+                  Object.values(prevTracking.sports || {}).some(Boolean),
+                  (prevTracking.water || 0) >= 2000,
+                  (prevTracking.protein || 0) >= 100,
+                  !!prevTracking.weight?.value
+                ].filter(Boolean).length : 0;
+                const prevIsFull = prevTasksCompleted >= 3;
+                const showStreakConnection = idx > 0 && isFull && prevIsFull;
+
+                let circleClass = 'w-12 h-12 rounded-full flex items-center justify-center font-bold relative';
+                if (isFull) {
+                  circleClass += ' bg-emerald-500 text-white shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]';
+                } else if (isPartial) {
+                  circleClass += ' ring-2 ring-amber-400 text-amber-200 bg-slate-700/40';
+                } else {
+                  circleClass += ' bg-red-500/60 text-white';
+                }
+
                 return (
-                  <div key={`week-${dateStr}`} className="flex flex-col items-center gap-1">
+                  <div key={`week-${dateStr}`} className="flex flex-col items-center gap-1 relative">
+                    {/* Streak connection line */}
+                    {showStreakConnection && (
+                      <div className="absolute top-[calc(50%+0.5rem)] right-[calc(50%+1.5rem)] w-8 h-0.5 bg-emerald-400/50 z-0" />
+                    )}
+
                     {/* Day label */}
                     <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
                       {format(day, 'EEE', { locale })}
                     </div>
 
-                    {/* Progress Circle (larger for week view) */}
-                    <div className="w-12 h-12 flex items-center justify-center relative">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                        {/* Background circle */}
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="none"
-                          className="stroke-gray-200 dark:stroke-gray-700"
-                          strokeWidth="4"
-                        />
-                        {/* Progress circle */}
-                        {progress > 0 && (
-                          <circle
-                            cx="18"
-                            cy="18"
-                            r="16"
-                            fill="none"
-                            className={`${
-                              isCurrentDay
-                                ? 'stroke-winter-500'
-                                : 'stroke-winter-400'
-                            }`}
-                            strokeWidth="4"
-                            strokeDasharray={`${progress} 100`}
-                            strokeLinecap="round"
-                          />
-                        )}
-                      </svg>
-                      {/* Day number */}
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center text-xs font-semibold ${
-                          isCurrentDay
-                            ? 'text-winter-600 dark:text-winter-400'
-                            : 'text-gray-600 dark:text-gray-300'
-                        }`}
-                      >
-                        {format(day, 'd')}
-                      </div>
+                    {/* Circle */}
+                    <div className={circleClass}>
+                      {format(day, 'd')}
                     </div>
                   </div>
                 );
@@ -326,9 +343,10 @@ function LeaderboardPage() {
           </div>
           </div>
         )}
+          </div>
 
-        {/* Leaderboard Rankings */}
-        <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-6">
+          {/* Right: Rankings */}
+          <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
             {t('group.rankings')}
           </h2>
@@ -362,7 +380,7 @@ function LeaderboardPage() {
                   }
                 >
                   <div className="flex items-center gap-4">
-                    {/* Profile Picture - only show if user allows sharing or it's the current user */}
+                    {/* Profile Picture - always show with default fallback */}
                     {(entry.shareProfilePicture || isCurrentUser) && entry.photoURL ? (
                       <img
                         src={entry.photoURL}
@@ -370,21 +388,18 @@ function LeaderboardPage() {
                         referrerPolicy="no-referrer"
                         className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-gray-600 object-cover flex-shrink-0"
                         onError={(e) => {
+                          // Replace with default avatar on error
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const badge = target.nextElementSibling as HTMLElement;
-                          if (badge) badge.style.display = 'flex';
+                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.nickname)}&background=random&size=96`;
                         }}
                       />
-                    ) : null}
-                    {/* Rank Badge - fallback if no photo or photo not shared */}
-                    <div
-                      className={`w-12 h-12 rounded-full ${getRankColor(
-                        rank
-                      )} ${(entry.shareProfilePicture || isCurrentUser) && entry.photoURL ? 'hidden' : 'flex'} items-center justify-center text-white font-bold text-lg flex-shrink-0`}
-                    >
-                      #{rank}
-                    </div>
+                    ) : (
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(entry.nickname)}&background=random&size=96`}
+                        alt={entry.nickname}
+                        className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-gray-600 object-cover flex-shrink-0"
+                      />
+                    )}
 
                     {/* User Info */}
                     <div className="flex-1 min-w-0">
@@ -403,16 +418,14 @@ function LeaderboardPage() {
                       </div>
                     </div>
 
-                    {/* Rank Badge on the right */}
-                    {(entry.shareProfilePicture || isCurrentUser) && entry.photoURL && (
-                      <div
-                        className={`w-10 h-10 rounded-full ${getRankColor(
-                          rank
-                        )} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
-                      >
-                        #{rank}
-                      </div>
-                    )}
+                    {/* Rank Badge on the right - always shown */}
+                    <div
+                      className={`w-10 h-10 rounded-full ${getRankColor(
+                        rank
+                      )} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
+                    >
+                      #{rank}
+                    </div>
                   </div>
 
                   {/* Expanded Details */}
@@ -463,9 +476,10 @@ function LeaderboardPage() {
             })}
             </div>
           )}
+          </div>
         </div>
 
-        {/* Achievements */}
+        {/* Achievements - Full Width */}
         <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
             🏅 {t('group.achievements')}
@@ -490,7 +504,7 @@ function LeaderboardPage() {
               {
                 icon: '⭐',
                 label: t('group.achievementTop3'),
-                locked: true // TODO: Calculate rank
+                locked: !isTop3
               },
             ].map((achievement) => (
               <div

@@ -60,52 +60,32 @@ function PushupTile() {
       <button
         type="button"
         onClick={() => setShowModal(true)}
-        className="w-full glass-dark touchable p-6 text-left text-white"
+        className="w-full glass-dark touchable p-3 text-left text-white"
       >
-        {/* Header with Count */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="text-3xl">💪</div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t('tracking.pushups')}
-            </h3>
+        {/* Header with Icon and Count */}
+        <div className="flex flex-col items-center mb-2">
+          <div className="text-xl mb-1">💪</div>
+          <div className="text-2xl font-bold text-winter-600 dark:text-winter-400">
+            {pushupsForDay}
           </div>
-          <div className="text-right">
-            <div className="text-4xl font-bold text-winter-600 dark:text-winter-400">
-              {pushupsForDay}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {displayDayLabel}
-            </div>
-          </div>
+          <h3 className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('tracking.pushups')}
+          </h3>
         </div>
 
-        {/* Training Plan Info - Enhanced */}
+        {/* Mobile: Show only today's total */}
         <div
           onClick={(e) => {
             e.stopPropagation();
             navigate('/tracking/pushup-training');
           }}
-          className="p-3 bg-gradient-to-r from-winter-50 to-blue-50 dark:from-winter-900/30 dark:to-blue-900/20 rounded-lg border border-winter-200 dark:border-winter-700 hover:shadow-md transition-all cursor-pointer"
+          className="p-2 bg-winter-50 dark:bg-winter-900/30 rounded-lg border border-winter-200 dark:border-winter-700 hover:shadow-md transition-all cursor-pointer text-center"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-winter-700 dark:text-winter-300 uppercase tracking-wide">
-              📊 {t('tracking.todaysPlan')}
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              → {t('tracking.startWorkout')}
-            </span>
+          <div className="text-sm font-bold text-gray-900 dark:text-white">
+            {t('tracking.today')}: {plannedTotal} {t('tracking.reps')}
           </div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-sm font-bold text-gray-900 dark:text-white">
-              {todayPlan.join(' • ')}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              = {plannedTotal} {t('tracking.reps')}
-            </div>
-          </div>
-          <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            💡 {t('tracking.planHint')}
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {t('tracking.startWorkout')}
           </div>
         </div>
       </button>

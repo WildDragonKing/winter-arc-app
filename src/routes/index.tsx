@@ -6,7 +6,6 @@ import OnboardingPage from '../pages/OnboardingPage';
 import DashboardPage from '../pages/DashboardPage';
 import LeaderboardPage from '../pages/LeaderboardPage';
 import SettingsPage from '../pages/SettingsPage';
-import HistoryPage from '../pages/HistoryPage';
 import PushupTrainingPage from '../pages/PushupTrainingPage';
 
 function AppRoutes() {
@@ -41,7 +40,6 @@ function AppRoutes() {
     <Layout>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/tracking/history" element={<HistoryPage />} />
         <Route path="/tracking/pushup-training" element={<PushupTrainingPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/settings" element={<SettingsPage />} />

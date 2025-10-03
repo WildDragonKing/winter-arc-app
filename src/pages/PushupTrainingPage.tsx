@@ -24,34 +24,26 @@ function PushupTrainingPage() {
   const [currentReps, setCurrentReps] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [restTimeLeft, setRestTimeLeft] = useState(0);
-  const [startCountdown, setStartCountdown] = useState(3);
-  const [isStarted, setIsStarted] = useState(false);
 
   const todayKey = format(new Date(), 'yyyy-MM-dd');
   const activeDate = selectedDate || todayKey;
-  const isToday = activeDate === todayKey;
-  const displayDayLabel = isToday ? 'Heute' : format(new Date(activeDate), 'dd.MM.');
 
-  // Generiere den Trainingsplan basierend auf Historie
+  // Generate training plan
   const lastTotal = getLastPushupTotal(tracking);
   const daysCompleted = countPushupDays(tracking);
-
-  // Initial total: Wenn noch keine Historie, nutze maxPushups * 2.5
   const initialTotal = lastTotal > 0 ? lastTotal : Math.round((user?.maxPushups || 20) * 2.5);
   const plan = generateProgressivePlan(initialTotal, daysCompleted);
   const plannedTotal = calculateTotalReps(plan);
 
-  const restTime = 60; // 60 Sekunden Pause
+  const restTime = 90; // 90 seconds rest
 
-  // Start countdown timer
+  // Disable body scroll on mount, restore on unmount
   useEffect(() => {
-    if (!isStarted && startCountdown > 0) {
-      const timer = setTimeout(() => setStartCountdown(startCountdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (!isStarted && startCountdown === 0) {
-      setIsStarted(true);
-    }
-  }, [startCountdown, isStarted]);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Rest timer
   useEffect(() => {
@@ -61,19 +53,13 @@ function PushupTrainingPage() {
     }
   }, [restTimeLeft]);
 
-
-  // Automatischer Satzabschluss, wenn Ziel erreicht
-  useEffect(() => {
-    if (currentReps > 0 && currentReps >= plan[currentSet] && restTimeLeft === 0 && currentSet < 5) {
-      handleCompleteSet();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentReps]);
-
   const handleTap = () => {
-    // Verhindere Scrollen auf Mobilgeräten
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    if (restTimeLeft > 0) return;
     setCurrentReps(currentReps + 1);
+    // Vibrate on tap if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
   };
 
   const handleCompleteSet = async () => {
@@ -81,18 +67,17 @@ function PushupTrainingPage() {
     setReps(newReps);
     setCurrentReps(0);
 
-  if (newReps.length < 5) {
-      // Nächster Satz - starte Pause
+    if (newReps.length < 5) {
+      // Next set - start rest
       setCurrentSet(currentSet + 1);
       setRestTimeLeft(restTime);
     } else {
-      // Training abgeschlossen
+      // Training complete
       setIsComplete(true);
       const total = calculateTotalReps(newReps);
 
       const prevPushups = tracking[activeDate]?.pushups || {};
-      // Ermittle Status korrekt
-      const planState = user?.pushupState || { baseReps: 10, sets: 5, restTime: 60 };
+      const planState = user?.pushupState || { baseReps: 10, sets: 5, restTime: 90 };
       const { status } = evaluateWorkout(planState, newReps);
       const newTracking = {
         ...tracking[activeDate],
@@ -110,264 +95,190 @@ function PushupTrainingPage() {
       if (user?.id) {
         saveDailyTracking(user.id, activeDate, newTracking);
       }
-      // AI Prompt Log für Training
+
+      // Log AI prompt
       if (user) {
-        const nickname = user.nickname;
-        const birthday = user.birthday;
-        // Tracking für den aktuellen User (kann auch alle Tage enthalten)
         try {
-          await generateDailyMotivation(tracking, nickname, birthday, 'PushupTraining Abschluss');
+          await generateDailyMotivation(tracking, user.nickname, user.birthday, 'PushupTraining Abschluss');
         } catch (e) {
-          console.warn('AI Prompt Log (PushupTraining) Fehler:', e);
+          console.warn('AI Prompt Log error:', e);
         }
       }
     }
   };
 
-  const handleSkipRest = () => {
-    setRestTimeLeft(0);
+  const adjustRestTime = (seconds: number) => {
+    setRestTimeLeft(Math.max(0, restTimeLeft + seconds));
   };
 
   const handleFinish = () => {
-    navigate('/tracking');
+    navigate('/');
   };
 
+  // Completion screen
   if (isComplete) {
     const totalReps = calculateTotalReps(reps);
     const plannedReps = plannedTotal;
     const performance = ((totalReps / plannedReps) * 100).toFixed(0);
+    const planState = user?.pushupState || { baseReps: 10, sets: 5, restTime: 90 };
+    const { status } = evaluateWorkout(planState, reps);
+
+    let statusText = '';
+    let statusColor = '';
+    if (status === 'pass') {
+      statusText = 'Pass 🔥';
+      statusColor = 'text-green-500';
+    } else if (status === 'hold') {
+      statusText = 'Hold 💪';
+      statusColor = 'text-amber-500';
+    } else {
+      statusText = 'Fail 🔄';
+      statusColor = 'text-red-500';
+    }
 
     return (
-  <div className="min-h-screen glass-dark rounded-2xl safe-area-inset-top">
-  <div className="glass-dark rounded-2xl text-white p-6 pb-8">
-          <div className="max-w-7xl mx-auto">
+      <div className="fixed inset-0 bg-gray-900 text-white flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <div className="text-center mb-8">
+            <div className="text-7xl font-bold text-emerald-400 mb-4">
+              {totalReps}
+            </div>
+            <div className="text-xl text-gray-300 mb-2">
+              Liegestütze insgesamt
+            </div>
+            <div className={`text-3xl font-bold mb-4 ${statusColor}`}>
+              {statusText}
+            </div>
+            <div className="text-lg text-gray-400">
+              {performance}% des Plans ({plannedReps})
+            </div>
+          </div>
+
+          {/* Set breakdown */}
+          <div className="w-full max-w-md space-y-2 mb-8">
+            {reps.map((rep, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
+              >
+                <span className="text-gray-300">Satz {index + 1}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">{rep}</span>
+                  <span className="text-sm text-gray-500">/ {plan[index]}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleFinish}
+            className="w-full max-w-md py-4 bg-emerald-500 text-white rounded-xl font-bold text-lg hover:bg-emerald-600 transition-colors"
+          >
+            Fertig
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Training screen
+  return (
+    <div
+      className="fixed inset-0 bg-gray-900 text-white flex flex-col overflow-hidden"
+      style={{ touchAction: 'none' }}
+      onTouchMove={(e) => e.preventDefault()}
+    >
+      {/* Header: Set chips */}
+      <div className="p-4 border-b border-gray-800">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          {plan.map((targetReps, idx) => {
+            const isActive = idx === currentSet;
+            const isDone = idx < currentSet;
+            return (
+              <div
+                key={idx}
+                className={`px-4 py-2 rounded-full text-lg font-bold transition-all ${
+                  isDone
+                    ? 'bg-emerald-500 text-white'
+                    : isActive
+                    ? 'bg-sky-500 text-white ring-2 ring-sky-400'
+                    : 'bg-gray-800 text-gray-500'
+                }`}
+              >
+                {targetReps}
+                {isDone && reps[idx] !== undefined && (
+                  <span className="ml-1 text-xs">({reps[idx]})</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-center text-sm text-gray-400">
+          Satz {currentSet + 1} / 5
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        {restTimeLeft > 0 ? (
+          // Rest timer
+          <div className="text-center">
+            <div className="text-9xl font-bold text-sky-400 mb-6">
+              {restTimeLeft}s
+            </div>
+            <div className="text-xl text-gray-300 mb-8">
+              Pause läuft...
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => adjustRestTime(-5)}
+                className="px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors"
+              >
+                -5s
+              </button>
+              <button
+                onClick={() => setRestTimeLeft(0)}
+                className="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-colors"
+              >
+                Skip
+              </button>
+              <button
+                onClick={() => adjustRestTime(5)}
+                className="px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors"
+              >
+                +5s
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Counter
+          <div className="w-full flex flex-col items-center">
+            <div className="text-sm text-gray-400 mb-4">
+              Ziel: {plan[currentSet]} Whd
+            </div>
+            <button
+              onClick={handleTap}
+              onTouchStart={handleTap}
+              className="w-full h-44 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl flex items-center justify-center text-white active:scale-95 transition-transform shadow-2xl mb-6"
+              style={{ touchAction: 'none', userSelect: 'none' }}
+            >
+              <div className="text-8xl font-bold">{currentReps}</div>
+            </button>
+            <button
+              onClick={handleCompleteSet}
+              disabled={currentReps === 0}
+              className="w-full py-4 bg-sky-500 text-white rounded-xl font-bold text-lg hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Satz abschließen
+            </button>
             <button
               onClick={() => navigate(-1)}
-              className="mb-4 text-winter-100 hover:text-white"
+              className="mt-4 text-gray-400 hover:text-gray-200 text-sm"
             >
-              ← Zurück
-            </button>
-            <h1 className="text-3xl font-bold">Training Abgeschlossen! 🎉</h1>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 -mt-4 pb-20">
-          <div className="glass-dark rounded-2xl shadow-lg p-8">
-            {/* Stats */}
-            <div className="text-center mb-8">
-              <div className="text-6xl font-bold text-winter-600 dark:text-winter-400 mb-2">
-                {totalReps}
-              </div>
-              <div className="text-gray-500 dark:text-gray-400">
-                Liegestütze insgesamt
-              </div>
-              <div className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
-                {performance}% des Plans
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Geplant waren {plannedReps}
-              </div>
-            </div>
-
-            {/* Set Breakdown */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Deine Sätze:
-              </h3>
-              <div className="space-y-3">
-                {reps.map((rep, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-winter-600 dark:bg-winter-500 text-white flex items-center justify-center font-bold" style={{ borderRadius: 0 }}>
-                        {index + 1}
-                      </div>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        Satz {index + 1}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {rep}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Ziel: {plan[index]}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Motivation */}
-            <div className="bg-winter-50 dark:bg-winter-900/20 p-6 mb-6" style={{ borderRadius: 0 }}>
-              <p className="text-center text-gray-900 dark:text-white font-medium">
-                {totalReps >= plannedReps
-                  ? '🔥 Fantastisch! Du hast dein Ziel erreicht!'
-                  : '💪 Weiter so! Morgen wird noch besser!'}
-              </p>
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Nächstes Mal sind {plannedReps + 1} Wiederholungen geplant.
-              </p>
-            </div>
-
-            <button
-              onClick={handleFinish}
-              className="w-full py-4 bg-winter-600 dark:bg-winter-500 text-white hover:bg-winter-700 dark:hover:bg-winter-600 transition-colors font-semibold text-lg"
-              style={{ borderRadius: 0 }}
-            >
-              Fertig
+              Abbrechen
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show countdown before starting
-  if (!isStarted) {
-    return (
-  <div className="min-h-screen glass-dark rounded-2xl flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-9xl font-bold text-winter-600 dark:text-winter-400 mb-4">
-            {startCountdown}
-          </div>
-          <p className="text-2xl text-gray-600 dark:text-gray-400">
-            Mach dich bereit...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-  <div className="min-h-screen glass-dark rounded-2xl safe-area-inset-top overflow-hidden">
-      {/* Header */}
-  <div className="glass-dark rounded-2xl text-white p-6 pb-8">
-        <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-4 text-winter-100 hover:text-white"
-          >
-            ← Zurück
-          </button>
-          <h1 className="text-3xl font-bold mb-2">Liegestütze Training</h1>
-          <p className="text-winter-100">
-            {displayDayLabel} geplant: {plannedTotal} Wiederholungen
-          </p>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 -mt-4 pb-20">
-  <div className="glass-dark rounded-2xl shadow-lg p-6">
-          {/* Plan Overview */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Dein Plan für heute:
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-              {plan.map((targetReps, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg text-center transition-all ${
-                    index < currentSet
-                      ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500'
-                      : index === currentSet
-                      ? 'bg-winter-100 dark:bg-winter-900/30 border-2 border-winter-500'
-                      : 'bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600'
-                  }`}
-                >
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Satz {index + 1}
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {targetReps}
-                  </div>
-                  {index < currentSet && reps[index] !== undefined && (
-                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      ✓ {reps[index]}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Current Set */}
-          {currentSet < 5 && (
-            <div className="mb-6">
-              <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                  Satz {currentSet + 1}
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Ziel: {plan[currentSet]} Wiederholungen
-                </p>
-              </div>
-
-              {/* Rest Timer */}
-              {restTimeLeft > 0 ? (
-                <div className="text-center mb-6">
-                  <div className="text-6xl font-bold text-winter-600 dark:text-winter-400 mb-2">
-                    {restTimeLeft}s
-                  </div>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    Pause läuft...
-                  </p>
-                  <button
-                    onClick={handleSkipRest}
-                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Pause überspringen
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Tap Circle */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-72 h-72 flex items-center justify-center overflow-hidden select-none" style={{ touchAction: 'manipulation' }}>
-                      <button
-                        onClick={handleTap}
-                        className="w-64 h-64 rounded-full bg-gradient-to-br from-winter-500 to-winter-700 hover:from-winter-600 hover:to-winter-800 active:scale-95 transition-all shadow-2xl flex flex-col items-center justify-center text-white focus:outline-none"
-                        style={{ userSelect: 'none' }}
-                      >
-                        <div className="text-7xl font-bold mb-2">{currentReps}</div>
-                        <div className="text-lg opacity-90">Tippe mit der Nase</div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleCompleteSet}
-                    disabled={currentReps === 0}
-                    className="w-full py-4 bg-winter-600 dark:bg-winter-500 text-white rounded-xl hover:bg-winter-700 dark:hover:bg-winter-600 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Satz abschließen ({currentReps} Wiederholungen)
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Progress */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
-              <span>Fortschritt</span>
-              <span>
-                {currentSet} / 5 Sätze
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-              <div
-                className="bg-gradient-to-r from-winter-500 to-winter-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${(currentSet / 5) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
