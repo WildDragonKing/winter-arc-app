@@ -13,6 +13,7 @@ function Layout({ children }: LayoutProps) {
   const navItems = [
     { path: '/', labelKey: 'nav.dashboard', icon: '🏠' },
     { path: '/leaderboard', labelKey: 'nav.group', icon: '👥' },
+    { path: '/notes', labelKey: 'nav.notes', icon: '📝' },
     { path: '/settings', labelKey: 'nav.settings', icon: '⚙️' },
   ];
 

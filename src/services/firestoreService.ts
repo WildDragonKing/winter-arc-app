@@ -288,3 +288,30 @@ export async function checkUserInTop3(userId: string, groupCode: string): Promis
     return false;
   }
 }
+
+// Notes operations
+export async function saveNotes(userId: string, notes: string) {
+  try {
+    const notesRef = doc(db, 'notes', userId);
+    await setDoc(notesRef, { notes, updatedAt: new Date().toISOString() });
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving notes:', error);
+    return { success: false, error };
+  }
+}
+
+export async function getNotes(userId: string) {
+  try {
+    const notesRef = doc(db, 'notes', userId);
+    const notesDoc = await getDoc(notesRef);
+
+    if (notesDoc.exists()) {
+      return { success: true, data: notesDoc.data().notes };
+    }
+    return { success: true, data: '' };
+  } catch (error) {
+    console.error('Error getting notes:', error);
+    return { success: false, error };
+  }
+}

@@ -6,6 +6,7 @@ export const translations = {
       tracking: 'Tracking',
       history: 'Historie',
       group: 'Gruppe',
+      notes: 'Notizen',
       settings: 'Einstellungen',
     },
     // Dashboard
@@ -187,6 +188,14 @@ export const translations = {
       next: 'Weiter',
       done: 'Fertig',
     },
+    // Notes
+    notes: {
+      title: 'Notizen',
+      subtitle: 'Deine Trainingsnotizen',
+      placeholder: 'Schreibe deine Gedanken, Ziele oder Trainingsnotizen hier...',
+      saved: 'Notizen gespeichert!',
+      saveError: 'Fehler beim Speichern der Notizen',
+    },
     // Common
     common: {
       yes: 'Ja',
@@ -206,6 +215,7 @@ export const translations = {
       tracking: 'Tracking',
       history: 'History',
       group: 'Group',
+      notes: 'Notes',
       settings: 'Settings',
     },
     // Dashboard
@@ -386,6 +396,14 @@ export const translations = {
       back: 'Back',
       next: 'Next',
       done: 'Done',
+    },
+    // Notes
+    notes: {
+      title: 'Notes',
+      subtitle: 'Your workout notes',
+      placeholder: 'Write your thoughts, goals, or workout notes here...',
+      saved: 'Notes saved!',
+      saveError: 'Error saving notes',
     },
     // Common
     common: {

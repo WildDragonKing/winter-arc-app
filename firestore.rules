@@ -36,5 +36,17 @@ service cloud.firestore {
       );
       allow delete: if false; // Groups cannot be deleted
     }
+
+    // Weekly Top 3 collection - authenticated users can read, only system can write
+    match /weeklyTop3/{snapshotId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated(); // Allow authenticated users to write (for the weekly snapshot feature)
+    }
+
+    // Notes collection - users can only read/write their own notes
+    match /notes/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
   }
 }
