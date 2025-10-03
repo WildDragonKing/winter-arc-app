@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   base: '/',
@@ -52,6 +53,24 @@ export default defineConfig({
           }
         ]
       }
-    })
-  ]
+    }),
+    visualizer({
+      filename: 'stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }) as any,
+  ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          'charts': ['recharts'],
+          'ai': ['@google/generative-ai'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
 });

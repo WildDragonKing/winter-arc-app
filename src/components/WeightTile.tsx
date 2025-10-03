@@ -60,10 +60,10 @@ function WeightTile() {
         createdAtDate = user.createdAt;
       } else if (typeof user.createdAt === 'object' && 'seconds' in user.createdAt) {
         // Firestore Timestamp object
-        createdAtDate = new Date((user.createdAt as any).seconds * 1000);
+  createdAtDate = new Date((user.createdAt as { seconds: number }).seconds * 1000);
       } else {
         // Try to convert to Date
-        createdAtDate = new Date(user.createdAt as any);
+  createdAtDate = new Date(user.createdAt as string | number | Date);
       }
 
       // Validate the date

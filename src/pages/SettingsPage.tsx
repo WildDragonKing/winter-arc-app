@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
 import * as Sentry from '@sentry/react';
@@ -5,8 +6,29 @@ import { auth } from '../firebase/config';
 import { useStore } from '../store/useStore';
 import { Language } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
+
+// Wetter-Stadt Auswahl Optionen
+const cityOptions = [
+  'Aachen', 'Berlin', 'Hamburg', 'München', 'Köln', 'Frankfurt', 'Stuttgart', 'Dresden', 'Leipzig', 'Düsseldorf'
+];
+
+
 
 function SettingsPage() {
+  // Wetter-Stadt Auswahl
+  const [weatherCity, setWeatherCity] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('weather-city') || 'Aachen';
+    }
+    return 'Aachen';
+  });
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setWeatherCity(e.target.value);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('weather-city', e.target.value);
+    }
+  };
   const { t } = useTranslation();
   const [showGroupInput, setShowGroupInput] = useState(false);
   const [groupCode, setGroupCode] = useState('');
@@ -30,8 +52,6 @@ function SettingsPage() {
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   const user = useStore((state) => state.user);
-  const darkMode = useStore((state) => state.darkMode);
-  const toggleDarkMode = useStore((state) => state.toggleDarkMode);
   const setUser = useStore((state) => state.setUser);
   const pwaInstallPrompt = useStore((state) => state.pwaInstallPrompt);
   const setPwaInstallPrompt = useStore((state) => state.setPwaInstallPrompt);
@@ -222,17 +242,32 @@ function SettingsPage() {
   };
 
   return (
-  <div className="min-h-screen glass-dark safe-area-inset-top">
+  <div className="min-h-screen-mobile glass-dark safe-pt">
       {/* Header */}
-  <div className="glass-dark text-white p-6 pb-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">⚙️ {t('settings.title')}</h1>
-          <p className="text-winter-100">{t('settings.subtitle')}</p>
+  <div className="glass-dark text-white px-4 py-6 md:px-6 md:py-8">
+        <div className="mobile-container">
+          <h1 className="text-fluid-h1 font-bold mb-2">⚙️ {t('settings.title')}</h1>
+          <p className="text-fluid-base text-winter-100">{t('settings.subtitle')}</p>
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 pt-4 pb-20 space-y-4">
+        {/* Wetter Stadt Auswahl */}
+        <div className="glass dark:glass-dark rounded-[20px] p-6 mb-2">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">🌤️ Wetter-Stadt</h2>
+          <label htmlFor="weather-city-select" className="block mb-2 text-sm text-gray-700 dark:text-gray-300">Stadt für Wetterdaten auswählen:</label>
+          <select
+            id="weather-city-select"
+            value={weatherCity}
+            onChange={handleCityChange}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-winter-500 outline-none"
+          >
+            {cityOptions.map((city) => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
         {/* Profile Section */}
         <div className="glass dark:glass-dark rounded-[20px] hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)] transition-all duration-300 p-6">
           <div className="flex items-center gap-4 mb-6">
@@ -523,24 +558,13 @@ function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold text-gray-900 dark:text-white">
-                {t('settings.darkMode')}
+                {t('settings.theme')}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {t('settings.darkModeDesc')}
+                {t('settings.themeDesc')}
               </div>
             </div>
-            <button
-              onClick={toggleDarkMode}
-              className={`relative w-14 h-8 rounded-full transition-colors ${
-                darkMode ? 'bg-winter-600' : 'bg-gray-300'
-              }`}
-            >
-              <div
-                className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                  darkMode ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
+            <ThemeToggle />
           </div>
         </div>
 

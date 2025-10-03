@@ -94,10 +94,10 @@ function DashboardPage() {
   }, [user, tracking]);
 
   return (
-    <div className="min-h-screen safe-area-inset-top">
+    <div className="min-h-screen-mobile safe-pt pb-20">
       {/* Header + AI Quote */}
-      <div className="relative text-white p-6 pb-8">
-        <div className="max-w-7xl mx-auto relative z-10">
+      <div className="relative text-white px-4 py-6 md:px-6 md:py-8">
+        <div className="mobile-container relative z-10">
           {/* Header Row */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
             <div className="flex-1 flex items-center gap-3 min-w-0">
@@ -178,7 +178,7 @@ function DashboardPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 pb-20 space-y-6 pt-4">
         {/* Week Overview */}
-        <div className="animate-fade-in-up delay-100">
+        <div className="animate-fade-in-up delay-100 mb-4">
           <WeekOverview />
         </div>
 

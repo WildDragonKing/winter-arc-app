@@ -1,11 +1,19 @@
 import { Link } from 'react-router-dom';
+
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { getGroupMembers } from '../services/firestoreService';
 
+type LeaderboardEntry = {
+  userId: string;
+  nickname: string;
+  score: number;
+  rank: number;
+};
+
 function LeaderboardPreview() {
   const user = useStore((state) => state.user);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -17,9 +25,9 @@ function LeaderboardPreview() {
         const result = await getGroupMembers(user.groupCode);
         if (result.success && result.data) {
           // Calculate scores and sort
-          const scored = result.data.map((member, index) => ({
-            userId: member.id,
-            nickname: member.nickname,
+          const scored: LeaderboardEntry[] = result.data.map((member: any, index: number) => ({
+            userId: String(member.id),
+            nickname: String(member.nickname),
             score: 100, // Placeholder score
             rank: index + 1,
           }));
@@ -92,9 +100,8 @@ function LeaderboardPreview() {
         </div>
       ) : leaderboard.length > 0 ? (
         <div className="space-y-3">
-          {leaderboard.map((entry) => {
+          {leaderboard.map((entry: LeaderboardEntry) => {
             const isCurrentUser = user?.nickname === entry.nickname;
-
             return (
               <div
                 key={entry.userId}

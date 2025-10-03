@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,14 +27,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Update npm dependencies
-        run: npm update
-
-      - name: Audit and fix vulnerabilities
-        run: npm audit fix --force
-
       - name: Install dependencies
         run: npm ci
+
+      # Optional: Nur Report, bricht den Build nicht ab
+      - name: Audit dependencies (report only)
+        run: npm audit --audit-level=moderate || true
 
       - name: Build
         env:

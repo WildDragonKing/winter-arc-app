@@ -69,6 +69,8 @@ function ProteinTile() {
         <div className="flex gap-1.5">
           <input
             type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addProtein()}

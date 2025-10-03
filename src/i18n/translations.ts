@@ -4,6 +4,7 @@ export const translations = {
     nav: {
       dashboard: 'Dashboard',
       tracking: 'Tracking',
+      history: 'Historie',
       group: 'Gruppe',
       settings: 'Einstellungen',
     },
@@ -116,6 +117,8 @@ export const translations = {
       language: 'Sprache',
       darkMode: 'Dark Mode',
       darkModeDesc: 'Dunkles Farbschema verwenden',
+      theme: 'Design',
+      themeDesc: 'Hell, Dunkel oder System folgen',
       appearance: 'Darstellung',
       group: 'Gruppe',
       currentGroup: 'Aktuelle Gruppe',
@@ -199,6 +202,7 @@ export const translations = {
     nav: {
       dashboard: 'Dashboard',
       tracking: 'Tracking',
+      history: 'History',
       group: 'Group',
       settings: 'Settings',
     },
@@ -311,6 +315,8 @@ export const translations = {
       language: 'Language',
       darkMode: 'Dark Mode',
       darkModeDesc: 'Use dark color scheme',
+      theme: 'Theme',
+      themeDesc: 'Light, Dark, or follow System',
       appearance: 'Appearance',
       group: 'Group',
       currentGroup: 'Current Group',

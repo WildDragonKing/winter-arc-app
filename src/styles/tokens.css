@@ -1,0 +1,221 @@
+/**
+ * Mobile-First Design Tokens
+ *
+ * Fluid typography, spacing, and layout tokens
+ * optimized for 320px–414px mobile devices with
+ * progressive enhancement for tablets and desktop.
+ */
+
+:root {
+  /* ========================================
+     FLUID TYPOGRAPHY SCALE
+     Base: 14px mobile → 16px desktop
+     ======================================== */
+
+  --font-size-xs: clamp(11px, 2.4vw, 12px);
+  --font-size-sm: clamp(12px, 2.8vw, 14px);
+  --font-size-base: clamp(14px, 3.2vw, 16px);
+  --font-size-lg: clamp(16px, 4vw, 18px);
+  --font-size-xl: clamp(18px, 4.4vw, 20px);
+
+  /* Headings - Mobile optimized */
+  --font-size-h1: clamp(20px, 6vw, 28px);
+  --font-size-h2: clamp(18px, 5.2vw, 24px);
+  --font-size-h3: clamp(16px, 4.4vw, 20px);
+
+  /* Line heights for readability */
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ========================================
+     FLUID SPACING SCALE
+     Mobile-optimized gaps and padding
+     ======================================== */
+
+  --gap-0: 0;
+  --gap-1: clamp(6px, 1.6vw, 8px);
+  --gap-2: clamp(10px, 2.4vw, 12px);
+  --gap-3: clamp(14px, 3.2vw, 16px);
+  --gap-4: clamp(18px, 4vw, 20px);
+  --gap-5: clamp(22px, 4.8vw, 24px);
+  --gap-6: clamp(26px, 5.6vw, 28px);
+  --gap-8: clamp(30px, 6.4vw, 32px);
+
+  /* ========================================
+     BORDER RADIUS
+     Friendly, rounded mobile UI
+     ======================================== */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ========================================
+     CONTAINER & LAYOUT
+     ======================================== */
+
+  --container-max-width: 720px;
+  --container-padding: var(--gap-2);
+
+  /* ========================================
+     TOUCH TARGETS
+     WCAG 2.1 AA minimum: 44×44px
+     ======================================== */
+
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+
+  /* ========================================
+     SAFE AREAS
+     iOS notch and Android gesture bars
+     ======================================== */
+
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
+  /* ========================================
+     Z-INDEX SCALE
+     ======================================== */
+
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-sticky: 20;
+  --z-bottom-nav: 30;
+  --z-fab: 35;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.mobile-container {
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding: var(--container-padding);
+}
+
+.safe-pb {
+  padding-bottom: calc(var(--gap-3) + var(--safe-area-bottom));
+}
+
+.safe-pt {
+  padding-top: calc(var(--gap-2) + var(--safe-area-top));
+}
+
+.safe-pl {
+  padding-left: calc(var(--gap-2) + var(--safe-area-left));
+}
+
+.safe-pr {
+  padding-right: calc(var(--gap-2) + var(--safe-area-right));
+}
+
+/* Edge-to-edge cards with safe padding */
+.card-mobile {
+  border-radius: var(--radius-2xl);
+  padding: var(--gap-3);
+  margin-inline: var(--gap-2);
+  margin-block: var(--gap-2);
+}
+
+/* Touch-friendly buttons */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Prevent layout shift with aspect ratio wrapper */
+.aspect-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.aspect-wrapper::before {
+  content: '';
+  display: block;
+  padding-bottom: var(--aspect-ratio, 56.25%); /* 16:9 default */
+}
+
+.aspect-wrapper > img,
+.aspect-wrapper > video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dynamic viewport height (fixes mobile URL bar) */
+.min-h-screen-mobile {
+  min-height: 100dvh;
+}
+
+/* Thumb-zone optimization */
+.thumb-zone-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--safe-area-bottom);
+}
+
+/* Text sizing utilities */
+.text-fluid-xs { font-size: var(--font-size-xs); }
+.text-fluid-sm { font-size: var(--font-size-sm); }
+.text-fluid-base { font-size: var(--font-size-base); }
+.text-fluid-lg { font-size: var(--font-size-lg); }
+.text-fluid-xl { font-size: var(--font-size-xl); }
+.text-fluid-h1 { font-size: var(--font-size-h1); }
+.text-fluid-h2 { font-size: var(--font-size-h2); }
+.text-fluid-h3 { font-size: var(--font-size-h3); }
+
+/* Gap utilities */
+.gap-fluid-1 { gap: var(--gap-1); }
+.gap-fluid-2 { gap: var(--gap-2); }
+.gap-fluid-3 { gap: var(--gap-3); }
+.gap-fluid-4 { gap: var(--gap-4); }
+.gap-fluid-5 { gap: var(--gap-5); }
+.gap-fluid-6 { gap: var(--gap-6); }
+.gap-fluid-8 { gap: var(--gap-8); }
+
+/* Single-column mobile layout */
+.mobile-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-2);
+}
+
+/* Responsive grid that collapses to single column */
+.mobile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-2);
+}
+
+@media (min-width: 768px) {
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-3);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-4);
+  }
+}

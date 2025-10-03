@@ -17,12 +17,12 @@ const firebaseConfig = {
 
 // Validate Firebase configuration
 console.log('🔥 Firebase Configuration:');
-console.log('  API Key:', firebaseConfig.apiKey ? '✓ Set' : '✗ Missing');
-console.log('  Auth Domain:', firebaseConfig.authDomain || '✗ Missing');
-console.log('  Project ID:', firebaseConfig.projectId || '✗ Missing');
-console.log('  Storage Bucket:', firebaseConfig.storageBucket || '✗ Missing');
-console.log('  Messaging Sender ID:', firebaseConfig.messagingSenderId || '✗ Missing');
-console.log('  App ID:', firebaseConfig.appId ? '✓ Set' : '✗ Missing');
+  console.warn('  API Key:', firebaseConfig.apiKey ? '✓ Set' : '✗ Missing');
+  console.warn('  Auth Domain:', firebaseConfig.authDomain || '✗ Missing');
+  console.warn('  Project ID:', firebaseConfig.projectId || '✗ Missing');
+  console.warn('  Storage Bucket:', firebaseConfig.storageBucket || '✗ Missing');
+  console.warn('  Messaging Sender ID:', firebaseConfig.messagingSenderId || '✗ Missing');
+  console.warn('  App ID:', firebaseConfig.appId ? '✓ Set' : '✗ Missing');
 
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.error('❌ Firebase configuration incomplete!');
@@ -41,20 +41,20 @@ const isLocalhost = window.location.hostname === 'localhost' || window.location.
 if (isLocalhost && recaptchaSiteKey && recaptchaSiteKey.length > 10) {
   try {
     // Enable App Check debug token for localhost
-    console.log('🔓 App Check Debug Mode enabled for localhost');
-    // @ts-ignore - self.FIREBASE_APPCHECK_DEBUG_TOKEN is a global variable
+  console.warn('🔓 App Check Debug Mode enabled for localhost');
+  // @ts-expect-error - self.FIREBASE_APPCHECK_DEBUG_TOKEN is a global variable
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 
     initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(recaptchaSiteKey),
       isTokenAutoRefreshEnabled: true,
     });
-    console.log('✓ Firebase App Check initialized with reCAPTCHA v3 (localhost only)');
+  console.warn('✓ Firebase App Check initialized with reCAPTCHA v3 (localhost only)');
   } catch (error) {
     console.warn('⚠ App Check initialization failed - continuing without App Check:', error);
   }
 } else {
-  console.info(
+  console.warn(
     'ℹ App Check disabled on production. ' +
     'To enable: Register your production domain in Firebase App Check settings.'
   );
@@ -71,6 +71,6 @@ googleProvider.setCustomParameters({
   prompt: 'select_account', // Always show account selection
 });
 
-console.log('🔐 Google OAuth Provider configured');
+console.warn('🔐 Google OAuth Provider configured');
 
 export default app;

@@ -12,6 +12,270 @@ Progressive Web App (PWA) für iOS und Android namens "Winter Arc Fitness Tracke
 
 ---
 
+## How to Work on This Repo
+
+### Branching Strategy
+- `main` - Production branch (protected, requires PR + CI pass)
+- `develop` - Staging branch for integration testing
+- `feat/<topic>` - Feature branches (branch from develop)
+- `fix/<topic>` - Bug fix branches
+
+### Commit Message Format
+Follow conventional commits style:
+```
+type(scope): subject
+
+body (optional)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `style`, `perf`
+
+### Scripts
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build            # Build for production
+npm run preview          # Preview production build
+
+# Quality Assurance
+npm run lint             # Run ESLint
+npm run lint:unused      # Check for unused imports
+npm run typecheck        # TypeScript type checking
+npm run scan:knip        # Find unused files/exports
+npm run scan:tsprune     # Find dead TypeScript exports
+npm run scan:dep         # Find unused dependencies
+
+# Testing (after setup)
+npm run test:unit        # Run Vitest unit tests
+npm run test:ui          # Run Playwright visual tests
+npm run test:all         # Run all checks (typecheck + lint + unit + UI)
+
+# Storybook (after setup)
+npm run storybook        # Start Storybook dev server
+npm run storybook:build  # Build Storybook for deployment
+```
+
+### Definition of Ready (DoR)
+Before starting work on a task:
+- [ ] Problem clearly defined with acceptance criteria
+- [ ] Impact and user value articulated
+- [ ] Technical approach discussed and approved
+- [ ] Test strategy identified (unit + UI tests needed?)
+- [ ] Light/dark mode considerations noted
+- [ ] Mobile/responsive requirements clear
+- [ ] Dependencies and blockers identified
+
+### Definition of Done (DoD)
+Before marking a task as complete:
+- [ ] Code works as expected in dev environment
+- [ ] All tests pass (`npm run test:all`)
+- [ ] Visual regression OK in both light and dark mode
+- [ ] No TypeScript errors or ESLint warnings
+- [ ] Code reviewed (if PR workflow)
+- [ ] Docs updated (CLAUDE.md, comments, etc.)
+- [ ] Commits follow message format
+- [ ] Mobile/responsive behavior tested
+- [ ] Telemetry/error logging added if needed
+
+### Pull Request Process
+1. Create feature branch from `develop`
+2. Make changes in small, focused commits
+3. Run `npm run test:all` locally
+4. Push and create PR with screenshots (light/dark)
+5. Address review feedback
+6. Squash-merge when CI passes
+
+---
+
+## Backlog & Experiments
+
+This section tracks planned features, ideas, and experimental work.
+
+### Status Definitions
+- 🔵 **idea** - Raw idea, not yet refined
+- 🟡 **draft** - Under exploration, needs design/tech validation
+- 🟢 **planned** - Refined, ready for implementation
+- 🔴 **blocked** - Waiting on dependencies or decisions
+
+### Planned Features
+
+#### 1. Pushup Training Mode (Status: 🟢 planned)
+**Value**: Structured progressive overload training with smart auto-progression
+**Acceptance Criteria**:
+- Implement Base & Bump algorithm (see App Structure section)
+- 90-second rest timer between sets
+- Pass/Hold/Fail status after workout
+- Weekly AMRAP re-calibration
+- Training history tracking
+
+#### 2. Profile Pictures (Status: 🟡 draft)
+**Value**: Personalization and social engagement in leaderboard
+**Acceptance Criteria**:
+- Upload profile picture in settings
+- Display in leaderboard and user profile
+- Firebase Storage integration (storageService.ts already exists)
+- Image compression/optimization
+- Placeholder avatars based on nickname initial
+
+#### 3. Leaderboard Preview Widget (Status: 🟡 draft)
+**Value**: Quick glance at standings without navigating to full leaderboard
+**Acceptance Criteria**:
+- Show top 3 users from group
+- Display on dashboard below week tracking
+- Tap to expand to full leaderboard page
+- Real-time updates
+
+#### 4. Push Notifications (Status: 🔵 idea)
+**Value**: Daily reminders to track progress
+**Needs**: Firebase Cloud Messaging setup, permission handling, notification settings UI
+
+#### 5. Data Export (Status: 🔵 idea)
+**Value**: Users can download their data (GDPR compliance, data portability)
+**Needs**: CSV/JSON export format, date range selection
+
+#### 6. Social Sharing (Status: 🔵 idea)
+**Value**: Viral growth, motivation through social pressure
+**Needs**: Generate shareable progress cards (images), share API integration
+
+#### 7. Achievements/Badges (Status: 🔵 idea)
+**Value**: Gamification, increased engagement
+**Needs**: Badge system design, unlock criteria, UI for badge display
+
+### Technical Debt & Improvements
+
+#### 1. Visual Regression Testing (Status: 🟢 planned)
+**Value**: Prevent UI bugs, ensure design consistency
+**Tasks**: Setup Playwright, create baseline screenshots, add CI workflow
+
+#### 2. Dark Mode Background Fix (Status: 🟢 planned)
+**Value**: Proper theming, professional appearance
+**Tasks**: Create dark variant of winter_arc_bg, implement CSS variable theming
+
+#### 3. Component Storybook (Status: 🟢 planned)
+**Value**: Isolated component development, design system documentation
+**Tasks**: Setup Storybook, create stories for tiles and core components
+
+#### 4. Vitest Unit Tests (Status: 🟡 draft)
+**Value**: Business logic validation, regression prevention
+**Needs**: Test pushup algorithm, calculations, data transformations
+
+---
+
+## Design Tokens & Theming
+
+### Color Palette
+
+**Light Mode:**
+```css
+--primary-blue: #3B82F6;      /* Accent color for CTAs */
+--bg-light: #F8FAFC;          /* Main background */
+--surface-light: #FFFFFF;     /* Cards, panels */
+--text-primary: #0F172A;      /* Headings, primary text */
+--text-secondary: #64748B;    /* Secondary text, labels */
+--border-light: #E2E8F0;      /* Dividers, borders */
+```
+
+**Dark Mode:**
+```css
+--primary-blue: #60A5FA;      /* Lighter blue for dark bg */
+--bg-dark: #0F172A;           /* Main background */
+--surface-dark: #1E293B;      /* Cards, panels */
+--text-primary-dark: #F1F5F9; /* Headings, primary text */
+--text-secondary-dark: #94A3B8; /* Secondary text, labels */
+--border-dark: #334155;       /* Dividers, borders */
+```
+
+**Glassmorphism:**
+```css
+--glass-light: rgba(255, 255, 255, 0.6);
+--glass-dark: rgba(17, 25, 40, 0.55);
+--glass-blur: blur(16px);
+--glass-border: rgba(255, 255, 255, 0.12);
+```
+
+### Typography Scale
+```css
+--text-xs: 0.75rem;    /* 12px - Small labels */
+--text-sm: 0.875rem;   /* 14px - Body small */
+--text-base: 1rem;     /* 16px - Body text */
+--text-lg: 1.125rem;   /* 18px - Subheadings */
+--text-xl: 1.25rem;    /* 20px - Headings */
+--text-2xl: 1.5rem;    /* 24px - Page titles */
+--text-3xl: 1.875rem;  /* 30px - Hero text */
+--text-4xl: 2.25rem;   /* 36px - Large numbers/stats */
+```
+
+### Spacing Scale
+```css
+--space-1: 0.25rem;  /* 4px */
+--space-2: 0.5rem;   /* 8px */
+--space-3: 0.75rem;  /* 12px */
+--space-4: 1rem;     /* 16px */
+--space-5: 1.25rem;  /* 20px */
+--space-6: 1.5rem;   /* 24px */
+--space-8: 2rem;     /* 32px */
+--space-10: 2.5rem;  /* 40px */
+--space-12: 3rem;    /* 48px */
+```
+
+### Border Radius
+```css
+--radius-sm: 0.375rem;  /* 6px - Small elements */
+--radius-md: 0.5rem;    /* 8px - Buttons, inputs */
+--radius-lg: 0.75rem;   /* 12px - Cards */
+--radius-xl: 1rem;      /* 16px - Panels */
+--radius-2xl: 1.5rem;   /* 24px - Hero cards */
+--radius-full: 9999px;  /* Circular elements */
+```
+
+### Z-Index Layers
+```css
+--z-base: 0;           /* Base layer */
+--z-dropdown: 10;      /* Dropdowns */
+--z-sticky: 20;        /* Sticky headers */
+--z-modal-backdrop: 40; /* Modal backgrounds */
+--z-modal: 50;         /* Modals */
+--z-toast: 60;         /* Toast notifications */
+--z-tooltip: 70;       /* Tooltips */
+```
+
+### Shadows
+```css
+--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+```
+
+### Animation
+```css
+--transition-fast: 150ms ease-in-out;
+--transition-base: 200ms ease-in-out;
+--transition-slow: 300ms ease-in-out;
+```
+
+### Backgrounds
+```css
+--bg-image-light: url('/bg/light/winter_arc_bg_light.webp');
+--bg-image-dark: url('/bg/dark/winter_arc_bg_dark.webp');
+```
+
+**Usage Pattern:**
+```tsx
+// Apply background to root layout
+<main className="app-bg min-h-screen">
+  {/* Glass cards */}
+  <section className="glass rounded-2xl p-6 shadow-xl">
+    ...
+  </section>
+</main>
+```
+
+---
+
 ## Technologie-Stack
 
 - **Frontend**: React mit TypeScript

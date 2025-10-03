@@ -130,16 +130,16 @@ function LoginPage() {
   };
 
   return (
-  <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-deep-navy, #0f172a)' }}>
-      <div className="max-w-md w-full">
-  <div className="glass-dark rounded-none shadow-xl p-8 text-center">
+    <div className="min-h-screen-mobile flex items-center justify-center px-4 py-6 app-bg safe-pt safe-pb">
+      <div className="w-full max-w-md">
+        <div className="glass rounded-2xl shadow-xl p-6 md:p-8 text-center">
           {/* Logo/Icon */}
           <div className="mb-8">
             <div className="text-6xl mb-4">❄️</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-fluid-h1 font-bold text-gray-900 dark:text-white mb-2">
               Winter Arc Tracker
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-fluid-base text-gray-600 dark:text-gray-300">
               Track your winter fitness journey
             </p>
           </div>
@@ -148,7 +148,7 @@ function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-2 border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="touch-target w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-2 border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 dark:hover:bg-gray-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             {loading ? (
               <span>Loading...</span>
@@ -207,7 +207,7 @@ function LoginPage() {
           {/* Demo Mode Button */}
           <button
             onClick={handleDemoLogin}
-            className="w-full mt-4 px-6 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+            className="touch-target w-full mt-4 px-6 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <span>🧪</span>
             <span>Demo Mode (Testing)</span>
