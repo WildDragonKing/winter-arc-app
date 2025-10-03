@@ -13,7 +13,6 @@ import { getWeatherForAachen } from '../services/weatherService';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { useTracking } from '../hooks/useTracking';
-import { Link } from 'react-router-dom';
 
 function DashboardPage() {
   const user = useStore((state) => state.user);

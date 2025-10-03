@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { startOfWeek, format } from 'date-fns';
 import { useStore } from '../store/useStore';
 import { getGroupMembers, saveWeeklyTop3 } from '../services/firestoreService';
+import type { UserWithStats } from '../types';
 
 export function useWeeklyTop3() {
   const user = useStore((state) => state.user);
@@ -37,8 +38,11 @@ export function useWeeklyTop3() {
         const result = await getGroupMembers(user.groupCode, lastWeekStart, lastWeekEnd);
 
         if (result.success && result.data) {
+          // Cast to UserWithStats (getGroupMembers returns extended user data)
+          const membersWithStats = result.data as UserWithStats[];
+
           // Sort by total pushups and streak
-          const sorted = [...result.data].sort((a, b) => {
+          const sorted = [...membersWithStats].sort((a, b) => {
             if (b.totalPushups !== a.totalPushups) return b.totalPushups - a.totalPushups;
             return b.streak - a.streak;
           });

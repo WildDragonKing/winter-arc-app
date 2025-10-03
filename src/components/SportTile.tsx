@@ -21,15 +21,10 @@ function SportTile() {
 
   const todayKey = format(new Date(), 'yyyy-MM-dd');
   const activeDate = selectedDate || todayKey;
-  const isToday = activeDate === todayKey;
   const activeTracking = tracking[activeDate];
   const currentSports: Record<SportKey, boolean> = activeTracking?.sports
     ? { ...defaultSportsState, ...activeTracking.sports }
     : { ...defaultSportsState };
-
-  const displayDayLabel = isToday
-    ? t('tracking.today')
-    : format(new Date(activeDate), 'dd.MM.');
 
   const toggleSport = (sport: SportKey) => {
     updateDayTracking(activeDate, {

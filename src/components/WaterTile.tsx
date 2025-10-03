@@ -12,13 +12,8 @@ function WaterTile() {
 
   const todayKey = format(new Date(), 'yyyy-MM-dd');
   const activeDate = selectedDate || todayKey;
-  const isToday = activeDate === todayKey;
   const activeTracking = tracking[activeDate];
   const currentWater = activeTracking?.water || 0;
-
-  const displayDayLabel = isToday
-    ? t('tracking.today')
-    : format(new Date(activeDate), 'dd.MM.');
 
   const waterGoal = user?.weight ? calculateWaterGoal(user.weight) : 3000;
 

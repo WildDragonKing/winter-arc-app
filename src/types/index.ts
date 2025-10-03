@@ -26,6 +26,16 @@ export interface User {
   pushupState: PushupState;
 }
 
+// Extended User interface with tracking statistics (returned by getGroupMembers)
+export interface UserWithStats extends User {
+  dailyPushups: number;
+  totalPushups: number;
+  sportSessions: number;
+  streak: number;
+  avgWater: number;
+  avgProtein: number;
+}
+
 export interface PushupState {
   baseReps: number;
   sets: number;

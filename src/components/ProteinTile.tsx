@@ -16,13 +16,8 @@ function ProteinTile() {
 
   const todayKey = format(new Date(), 'yyyy-MM-dd');
   const activeDate = selectedDate || todayKey;
-  const isToday = activeDate === todayKey;
   const activeTracking = tracking[activeDate];
   const currentProtein = activeTracking?.protein || 0;
-
-  const displayDayLabel = isToday
-    ? t('tracking.today')
-    : format(new Date(activeDate), 'dd.MM.');
 
   const proteinGoal = user?.weight ? calculateProteinGoal(user.weight) : 150;
 

@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import type { User, DailyTracking } from '../types';
+import type { User, DailyTracking, UserWithStats } from '../types';
 
 // User operations
 export async function saveUser(userId: string, userData: Omit<User, 'id'>) {
@@ -235,7 +235,7 @@ export async function getGroupMembers(groupCode: string, startDate?: Date, endDa
         })
       );
 
-      return { success: true, data: members.filter(Boolean) as User[] };
+      return { success: true, data: members.filter(Boolean) as UserWithStats[] };
     }
     return { success: false, error: 'Group not found' };
   } catch (error) {

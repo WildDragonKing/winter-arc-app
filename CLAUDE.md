@@ -58,6 +58,33 @@ npm run storybook        # Start Storybook dev server
 npm run storybook:build  # Build Storybook for deployment
 ```
 
+### Pre-Commit Checklist (MANDATORY)
+
+**IMPORTANT: ALWAYS run these commands before committing ANY code changes:**
+
+```bash
+# 1. TypeScript Type Checking (catches build-time errors)
+npm run typecheck
+
+# 2. ESLint (catches code quality issues)
+npm run lint
+```
+
+**Why this is critical:**
+- GitHub Actions CI runs these checks on every push
+- Failing checks block deployment and waste time
+- Local validation catches errors immediately
+- Prevents embarrassing build failures in CI
+
+**Workflow:**
+1. Make code changes
+2. Run `npm run typecheck` → Fix all TypeScript errors
+3. Run `npm run lint` → Fix critical ESLint errors (warnings are okay)
+4. Commit only when both checks pass
+5. Push to GitHub
+
+**Never skip this step.** If you encounter errors, fix them before committing.
+
 ### Definition of Ready (DoR)
 Before starting work on a task:
 - [ ] Problem clearly defined with acceptance criteria
@@ -71,9 +98,10 @@ Before starting work on a task:
 ### Definition of Done (DoD)
 Before marking a task as complete:
 - [ ] Code works as expected in dev environment
+- [ ] **Pre-Commit Checklist completed** (`npm run typecheck` + `npm run lint`)
 - [ ] All tests pass (`npm run test:all`)
 - [ ] Visual regression OK in both light and dark mode
-- [ ] No TypeScript errors or ESLint warnings
+- [ ] No TypeScript errors (ESLint warnings are acceptable)
 - [ ] Code reviewed (if PR workflow)
 - [ ] Docs updated (CLAUDE.md, comments, etc.)
 - [ ] Commits follow message format
@@ -83,10 +111,11 @@ Before marking a task as complete:
 ### Pull Request Process
 1. Create feature branch from `develop`
 2. Make changes in small, focused commits
-3. Run `npm run test:all` locally
-4. Push and create PR with screenshots (light/dark)
-5. Address review feedback
-6. Squash-merge when CI passes
+3. **Run Pre-Commit Checklist** (`npm run typecheck` + `npm run lint`)
+4. Run `npm run test:all` locally (if tests are set up)
+5. Push and create PR with screenshots (light/dark)
+6. Address review feedback
+7. Squash-merge when CI passes
 
 ---
 

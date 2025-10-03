@@ -180,7 +180,6 @@ function LeaderboardPage() {
               {daysInWeek.map((day, idx) => {
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const dayTracking = tracking[dateStr];
-                const isCurrentDay = isToday(day);
 
                 // Calculate progress percentage
                 const pushups = dayTracking?.pushups?.total || 0;
@@ -199,7 +198,6 @@ function LeaderboardPage() {
                 // Status: full (3-5), partial (1-2), empty (0)
                 const isFull = tasksCompleted >= 3;
                 const isPartial = tasksCompleted > 0 && tasksCompleted < 3;
-                const isEmpty = tasksCompleted === 0;
 
                 // Check if previous day is also complete for streak connection
                 const prevDay = idx > 0 ? daysInWeek[idx - 1] : null;

@@ -105,17 +105,6 @@ export async function generateDailyMotivation(
     // (bereits oben deklariert)
 
     // Prompt-String deklarieren
-    // Feedback-Kontext (letzte 7 Feedbacks, falls vorhanden)
-    let feedbackHistory: any[] = [];
-    if (typeof window !== 'undefined') {
-      const raw = localStorage.getItem('ai_feedback_history');
-      if (raw) {
-        try {
-          feedbackHistory = JSON.parse(raw);
-        } catch {}
-      }
-    }
-
     const prompt = `Schreibe eine kurze, motivierende Nachricht in maximal 2 Zeilen, basierend auf Streak, heutigen Aufgaben und Protein/Wasser-Fortschritt. Direkt, positiv, ohne Floskeln.
 
 Daten:
