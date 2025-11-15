@@ -11,17 +11,13 @@ const MOBILE_BREAKPOINT = 481; // < 481px is mobile
  */
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
-    // Initialize based on current window size
     if (typeof window === 'undefined') return false;
-    return window.innerWidth < MOBILE_BREAKPOINT;
+    return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`).matches;
   });
 
   useEffect(() => {
     // Create media query for mobile breakpoint
     const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-
-    // Handle initial state
-    setIsMobile(mediaQuery.matches);
 
     // Handler for media query changes
     const handleChange = (e: MediaQueryListEvent) => {

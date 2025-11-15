@@ -2,8 +2,8 @@
 // Handles push notifications and offline support
 
 // Installation: defer activation until explicit client message
-self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker (waiting)...');
+self.addEventListener('install', (_event) => {
+  console.warn('[SW] Installing Service Worker (waiting)...');
 });
 
 let BASE_URL = self.registration.scope; // default to scope
@@ -11,7 +11,7 @@ let BASE_URL = self.registration.scope; // default to scope
 const ALLOWED_ORIGINS = new Set([self.location.origin]);
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...');
+  console.warn('[SW] Activating Service Worker...');
   event.waitUntil(clients.claim());
 });
 
@@ -55,7 +55,7 @@ self.addEventListener('message', (event) => {
     }
 
     if (type === 'SW_ACTIVATE_NOW') {
-      console.log('[SW] Received SW_ACTIVATE_NOW, calling skipWaiting');
+      console.warn('[SW] Received SW_ACTIVATE_NOW, calling skipWaiting');
       await self.skipWaiting();
       return;
     }
@@ -71,7 +71,7 @@ self.addEventListener('message', (event) => {
           return;
         }
         BASE_URL = candidateUrl.href;
-        console.log('[SW] BASE_URL updated to:', BASE_URL);
+        console.warn('[SW] BASE_URL updated to:', BASE_URL);
       } catch (setError) {
         console.error('[SW] Invalid BASE_URL payload ignored', { payload, error: setError });
       }
@@ -99,7 +99,7 @@ self.addEventListener('push', function (event) {
 
 // Notification Click Handler
 self.addEventListener('notificationclick', function (event) {
-  console.log('[SW] Notification click received.');
+  console.warn('[SW] Notification click received.');
   event.notification.close();
   const target = BASE_URL || 'https://app.winterarc.newrealm.de';
   event.waitUntil(clients.openWindow(target));

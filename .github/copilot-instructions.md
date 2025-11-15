@@ -1,25 +1,17 @@
 # GitHub Copilot Instructions - Winter Arc App
 
+⚠️ **IMPORTANT**: This file is synchronized with `claude.md` (root). Both files must stay in sync.
+
+**When updating this file:**
+- Critical changes → also update `claude.md`
+- Policy changes (Security, Dependencies, Branch Naming) → sync to both files
+- Keep this file concise (quick-ref); `claude.md` remains detailed (comprehensive guide)
+
+---
+
 ## Project Overview
 
-Winter Arc is a Progressive Web App (PWA) for fitness tracking with push-ups, sports, nutrition, and weight management. Built with Next.js 15 + React 19 + TypeScript + PostgreSQL (Vercel Postgres/Neon).
-
-## OpenSpec Framework (CRITICAL)
-
-**Before implementing features, ALWAYS check:**
-
-1. Read `openspec/AGENTS.md` for spec-driven development workflow
-2. Run `openspec list` to see active changes and avoid conflicts
-3. For new features: Create proposal in `openspec/changes/[change-id]/` with `proposal.md`, `tasks.md`, and spec deltas
-4. Validate with `openspec validate [change-id] --strict` before implementation
-
-**Triggers for creating OpenSpec proposals:**
-
-- New features, breaking changes, architecture shifts
-- Performance optimizations that change behavior
-- Security pattern updates
-
-**Skip proposals for:** Bug fixes, typos, dependency updates, tests for existing behavior.
+Winter Arc is a Progressive Web App (PWA) for fitness tracking with push-ups, sports, nutrition, and weight management. Built with Next.js 16 + React 19 + TypeScript + PostgreSQL (Vercel Postgres/Neon).
 
 ## Mandatory Branch Naming
 
@@ -68,8 +60,8 @@ groups → { id, code, name, members[], createdAt }
 
 ## Code Quality (Pre-commit/Push Hooks)
 
-**Pre-commit:** TypeScript + ESLint + Secret Scanning
-**Pre-push:** TypeScript + ESLint + Tests + Build + Branch Name Validation
+**Pre-commit:** TypeScript + ESLint + Secret Scanning (fix every warning before committing)
+**Pre-push:** TypeScript + ESLint + Tests + `vercel build` + Branch Name Validation (no skipped steps)
 
 **Coverage Requirements:**
 
@@ -83,60 +75,52 @@ groups → { id, code, name, members[], createdAt }
 - No `console.*` in production (use logger or remove)
 - Extract magic numbers to constants
 
-## Dependency Policy (NEW)
+## Dependency Policy
 
-To keep the stack healthy and avoid hidden technical debt:
+Keep dependencies current and transparent. Never suppress warnings. Treat vulnerabilities as immediate priorities.
 
-- Always prefer the latest stable (non-beta) versions of direct dependencies. Schedule upgrades rather than pinning old versions unless a regression is confirmed.
-- Do NOT suppress, hide, or bypass dependency warnings (deprecated, vulnerabilities). Resolve them by upgrading or refactoring.
-- Avoid hacky workarounds like blanket `overrides`, disabling audits, or silencing peer warnings. If a transitive issue appears, open an upstream issue and document a temporary mitigation in `DECISIONS.md` with an expiry date.
-- Remove unused packages proactively (use `depcheck`, `knip`). Each removal should pass typecheck, lint, and tests.
-- If an upgrade needs code changes (e.g. API differences), implement those changes cleanly rather than freezing versions.
-- Security and deprecation warnings are treated as tasks, not noise—never ignore.
+**Quick Rules:**
 
-Upgrade Workflow:
+- Prefer latest stable (non-beta) versions
+- Never suppress warnings (deprecated, vulnerabilities, peer conflicts)
+- Remove unused packages proactively (`depcheck`, `knip`)
+- Adapt code to dependencies, not vice versa
+- For major infrastructure upgrades (Next.js, React, TypeScript), ask user first
 
-1. Run `npx depcheck && npx knip` to identify unused/dead deps.
-2. Upgrade target package (`npm install <pkg>@latest`).
-3. Run `npm run test:all` (typecheck + lint + tests + build).
-4. If failures occur, adapt code; do NOT downgrade unless blocking upstream bug is verified.
-5. Record notable upgrade decisions or blockers in `openspec/DECISIONS.md`.
+**Upgrade Workflow:** depcheck/knip → upgrade → test:all → fix code → document
 
-Temporary Exceptions:
-Only allowed if: (a) upstream critical bug, (b) security patch pending. Must include removal plan and owner.
+**📘 See [CONTRIBUTING.md - Dependency Management](../CONTRIBUTING.md#dependency-management) for:**
 
-Result: Clean dependency tree, minimal maintenance friction, transparent upgrade path.
+- Complete 5-step upgrade workflow
+- Security remediation procedures (SLAs, forbidden practices)
+- Infrastructure upgrade request template
+- Decision tracking format (`docs/DECISIONS.md`)
+- Integration with CI/CD
 
 ## Security First Policy (PRIO #1)
 
-Security steht über allem – jede erkannte Schwachstelle (npm audit, Snyk, GitHub Advisory, Dependabot) wird sofort triagiert.
+Every vulnerability is triaged immediately with strict SLAs.
 
-Grundsätze:
+**Response Times:**
 
-- Keine Ignorierlisten außer dokumentierten, zeitlich befristeten Ausnahmen (max 30 Tage) in `openspec/DECISIONS.md` mit Owner & Entferndatum.
-- Hohe / kritische Vulnerabilities: Patch oder Upgrade noch am selben Tag (spätestens nächster Arbeits-Tag).
-- Moderate / Low: Bündeln, aber spätestens innerhalb von 7 Tagen lösen.
-- Niemals Sicherheitswarnungen durch Abschalten von `audit`, `fund`, oder künstliche Overrides verstecken.
-- Bei Transitivem Blocker: Upstream Issue eröffnen, Link + Tracking in `DECISIONS.md`.
+- Critical/High: Same day or next business day
+- Moderate: Within 7 days
+- Low: Within 14 days
 
-Remediation Workflow:
+**Target: Zero open High/Critical vulnerabilities**
 
-1. `npm audit --json` parsen → Priorität bestimmen.
-2. Für direkte Dependencies: `npm install <pkg>@latest` oder Security-Fix Version.
-3. Für transitive: Versuchen Upgrade des Root-Pakets; wenn nicht möglich, Issue + temporäre Mitigation dokumentieren.
-4. Nach jedem Fix: `npm run test:all` (lint + typecheck + tests + build) + manuelles Smoke-Test (App Start).
-5. PR Titel Format: `security:<package>-<version>` oder Sammel-PR `security:monthly-batch-YYYY-MM`.
+**Forbidden:**
 
-Zielmetriken:
+- Disabling `npm audit` or using ignore lists without time limits
+- Using `overrides` to force vulnerable versions
+- Postponing security patches
 
-- Offen High/Critical: 0
-- Mean Time To Remediate (Critical): <24h
-- Keine stillgelegten Audits / versteckten Advisories
+**📘 See [CONTRIBUTING.md - Dependency Management](../CONTRIBUTING.md#dependency-management) for:**
 
-Transparenz:
-
-- Monatlicher Security-Abschnitt im `CHANGELOG.md` bei produktiven Releases.
-- Jede Ausnahme klar mit "EXPIRY" versehen.
+- Detailed remediation workflow
+- Acceptable temporary exceptions (max 30 days)
+- Metrics and transparency requirements
+- Decision tracking in `docs/DECISIONS.md`
 
 ## Critical Commands
 
@@ -153,13 +137,10 @@ npm run db:migrate             # Run migrations
 # Quality Checks (run before committing)
 npm run lint                   # ESLint
 npm run typecheck              # TypeScript strict mode
+npm run vercel:build           # Vercel production build (fails if linking/CLI is broken)
 npm test                       # Vitest unit tests
 npm run test:all               # All checks (lint + typecheck + test + build)
 
-# OpenSpec
-openspec list                  # List active changes
-openspec list --specs          # List specifications
-openspec validate [id] --strict # Validate change proposal
 ```
 
 ## Environment Variables

@@ -1,7 +1,4 @@
 import Dexie, { Table } from 'dexie';
-// TODO: Remove Firebase dependency after full PostgreSQL migration
-// import type { Auth } from 'firebase/auth';
-type Auth = any; // Temporary stub during migration
 import { deleteSmartNote as deleteRemoteSmartNote, fetchAllSmartNotes, upsertSmartNote } from '../services/smartNoteService';
 import { SmartNote, WorkoutEvent } from '../types/events';
 
@@ -114,26 +111,23 @@ async function fetchNotes(limit: number, cursor?: number): Promise<SmartNote[]> 
   return filtered.slice(0, limit);
 }
 
-let cachedAuth: Auth | null | undefined;
-
-async function getFirebaseAuth(): Promise<Auth | null> {
-  if (cachedAuth !== undefined) {
-    return cachedAuth;
-  }
-
+// Helper to get current user ID from NextAuth session (client-side only)
+async function getCurrentUserId(): Promise<string | null> {
   if (typeof window === 'undefined') {
-    cachedAuth = null;
-    return cachedAuth;
+    return null;
   }
 
   try {
-    const firebaseModule = await import('../firebase');
-    cachedAuth = firebaseModule.auth;
-    return cachedAuth;
+    // Use NextAuth session endpoint to get current user
+    const response = await fetch('/api/auth/session');
+    if (!response.ok) {
+      return null;
+    }
+    const session = await response.json();
+    return session?.user?.id || null;
   } catch (error) {
-    console.warn('Firebase auth unavailable, skipping remote persistence.', error);
-    cachedAuth = null;
-    return cachedAuth;
+    console.warn('Unable to fetch session, skipping remote persistence.', error);
+    return null;
   }
 }
 
@@ -142,8 +136,7 @@ function hasPendingAttachmentUpload(note: SmartNote): boolean {
 }
 
 async function persistRemote(note: SmartNote): Promise<void> {
-  const authInstance = await getFirebaseAuth();
-  const userId = authInstance?.currentUser?.uid;
+  const userId = await getCurrentUserId();
   if (!userId) {
     console.warn('Skipping remote smart note persistence (no authenticated user).');
     return;
@@ -163,8 +156,7 @@ async function persistRemote(note: SmartNote): Promise<void> {
 async function removeRemote(note: SmartNote | undefined): Promise<void> {
   if (!note) return;
 
-  const authInstance = await getFirebaseAuth();
-  const userId = authInstance?.currentUser?.uid;
+  const userId = await getCurrentUserId();
   if (!userId) {
     console.warn('Skipping remote smart note removal (no authenticated user).');
     return;
@@ -291,8 +283,7 @@ export const noteStore = {
     return sumEvents(notes);
   },
   async syncFromRemote() {
-    const authInstance = await getFirebaseAuth();
-    const userId = authInstance?.currentUser?.uid;
+    const userId = await getCurrentUserId();
     if (!userId) {
       return;
     }

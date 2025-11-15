@@ -21,67 +21,11 @@ import type { FirebaseStorage } from 'firebase/storage';
 // Stub types during migration
 type Firestore = any;
 type FirebaseStorage = any;
-type QueryConstraint = any;
-
 import type { SmartNote, SmartNoteAttachment } from '../types/events';
-
-const COLLECTION_KEY = 'smartNotes';
-
-type AnyRecord = Record<string, unknown>;
-
 type FetchOptions = {
   limit?: number;
   cursor?: number;
 };
-
-const FIRESTORE_INVALID_FIELD_CHARACTERS = ['~', '*', '/', '[', ']'];
-
-function isValidKey(key: string): boolean {
-  if (key.trim() === '') {
-    return false;
-  }
-
-  if (key.startsWith('__')) {
-    return false;
-  }
-
-  return !FIRESTORE_INVALID_FIELD_CHARACTERS.some((invalidChar) => key.includes(invalidChar));
-}
-
-function sanitizeForFirestore<T>(value: T): T {
-  if (value === null || value === undefined) {
-    return value;
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => sanitizeForFirestore(item)) as unknown as T;
-  }
-
-  if (value instanceof Date) {
-    return new Date(value.getTime()) as unknown as T;
-  }
-
-  if (typeof value === 'object') {
-    const sanitizedEntries = Object.entries(value as AnyRecord).reduce<AnyRecord>((acc, [key, entryValue]) => {
-      if (entryValue === undefined) {
-        return acc;
-      }
-
-      if (typeof key === 'string' && key.trim() !== '') {
-        if (isValidKey(key)) { acc[key] = sanitizeForFirestore(entryValue); }
-      }
-      return acc;
-    }, {});
-
-    return sanitizedEntries as T;
-  }
-
-  return value;
-}
-
-function isDataUrl(url: string): boolean {
-  return url.startsWith('data:');
-}
 
 let cachedDb: Firestore | null | undefined;
 let cachedStorage: FirebaseStorage | null | undefined;
@@ -98,8 +42,6 @@ async function getFirestoreInstance(): Promise<Firestore | null> {
   }
 
   try {
-    const firebaseModule = await import('../firebase');
-    // cachedDb = firebaseModule.db; // Firebase removed
     cachedDb = null;
     return cachedDb;
   } catch (error) {
@@ -121,8 +63,6 @@ async function getStorageInstance(): Promise<FirebaseStorage | null> {
   }
 
   try {
-    const firebaseModule = await import('../firebase');
-    // cachedStorage = firebaseModule.storage; // Firebase removed
     cachedStorage = null;
     return cachedStorage;
   } catch (error) {
@@ -133,9 +73,9 @@ async function getStorageInstance(): Promise<FirebaseStorage | null> {
 }
 
 async function ensureAttachmentUploaded(
-  storage: FirebaseStorage,
-  userId: string,
-  noteId: string,
+  _storage: FirebaseStorage,
+  _userId: string,
+  _noteId: string,
   attachment: SmartNoteAttachment
 ): Promise<SmartNoteAttachment> {
   // Stubbed during Firebase → PostgreSQL migration
@@ -199,7 +139,7 @@ export async function upsertSmartNote(userId: string, note: SmartNote): Promise<
 
   // Stubbed during Firebase → PostgreSQL migration
   // const docRef = doc(firestore, 'users', userId, COLLECTION_KEY, note.id);
-  // await setDoc(docRef, sanitizeForFirestore(payload), { merge: true });
+  // await setDoc(docRef, payload, { merge: true });
 
   return payload;
 }
@@ -228,16 +168,15 @@ export async function deleteSmartNote(userId: string, note: SmartNote): Promise<
   }
 }
 
-export async function fetchSmartNotes(userId: string, options: FetchOptions = {}): Promise<SmartNote[]> {
+export async function fetchSmartNotes(_userId: string, _options: FetchOptions = {}): Promise<SmartNote[]> {
   const firestore = await getFirestoreInstance();
   if (!firestore) {
     return [];
   }
 
-  const { limit: limitValue, cursor } = options;
   // Stubbed during Firebase → PostgreSQL migration
   // const collectionRef = collection(firestore, 'users', userId, COLLECTION_KEY);
-  // const constraints: QueryConstraint[] = [orderBy('ts', 'desc')];
+  // const constraints = [orderBy('ts', 'desc')];
 
   // if (typeof cursor === 'number') {
   //   constraints.push(where('ts', '<', cursor));
@@ -260,7 +199,7 @@ export async function fetchSmartNotes(userId: string, options: FetchOptions = {}
   });
 }
 
-export async function fetchAllSmartNotes(userId: string): Promise<SmartNote[]> {
+export async function fetchAllSmartNotes(_userId: string): Promise<SmartNote[]> {
   const firestore = await getFirestoreInstance();
   if (!firestore) {
     return [];

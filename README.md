@@ -93,9 +93,10 @@ Tipp: Füge die App deinem Homescreen hinzu für schnellen Zugriff.
 
 Möchtest du tiefer einsteigen oder beitragen? Schau in die technischen Unterlagen:
 
-- `CONTRIBUTING.md` – Hinweise für Beiträge (Verweis auf die technischen Entwickler-Guidelines)
-- `docs/development-guidelines.md` – Zentrale Entwickler-Dokumentation mit Setup, Branch-Policy, Coding-Standards und Tooling
-- `docs/` – Weitere Hintergrundinfos
+- [CONTRIBUTING.md](CONTRIBUTING.md) – Contributor Guidelines mit Branch-Policy, PR-Workflow, Testing und Next.js-Patterns
+- [CLAUDE.md](CLAUDE.md) – Zentrale Entwickler-Dokumentation mit Architektur, Patterns und Critical Guidelines
+- [docs/1PASSWORD.md](docs/1PASSWORD.md) – Secrets Management Setup
+- [docs/](docs/) – Weitere Hintergrundinfos (Training Load, Security, etc.)
 
 Issues, Feedback oder Ideen: Erstelle ein [Issue auf GitHub](https://github.com/NewRealm-Projects/winter-arc-app/issues).
 

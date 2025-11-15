@@ -1,32 +1,36 @@
 import NextAuth from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
+import Google from "next-auth/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/lib/db"
 import { users, type NewUser } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
-// Defensive: ensure db is available before constructing adapter to satisfy strict null checks.
-// Enforce non-null database instance at runtime; aids strict type usage below.
-if (!db) {
-  throw new Error("Database instance not initialized")
-}
-const database = db!;
+// Defensive: ensure db is available for runtime operations.
+// During build time, db may be null. The adapter and callbacks handle this gracefully
+// by deferring database access until actual authentication requests occur.
+const database = db ?? null;
 
 // DrizzleAdapter's helper types expect the full default schema. We only override the users table,
 // so silence the type mismatch while relying on the runtime contract provided by the adapter.
 // @ts-expect-error Partial table override is intentional.
-const adapter = DrizzleAdapter(database, { usersTable: users });
+const adapter = database ? DrizzleAdapter(database, { usersTable: users }) : undefined;
 
+// NextAuth v5 configuration with unified export pattern
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter,
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "", // empty fallback to avoid build-time crash
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     })
   ],
   callbacks: {
     async signIn({ user, account }) {
+      if (!database) {
+        console.warn('Database not available during sign in');
+        return false;
+      }
+
       if (account?.provider === "google" && user.email) {
         try {
           const email = user.email!;
@@ -80,6 +84,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async session({ session }) {
+      if (!database) {
+        console.warn('Database not available during session callback');
+        return session;
+      }
+
       if (session.user?.email) {
         const dbUser = await database.select().from(users).where(eq(users.email, session.user.email)).limit(1)
         const first = dbUser[0]
@@ -97,7 +106,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt' as const },
 });
 
+// Export API route handlers (NextAuth v5 pattern)
 export { handlers as GET, handlers as POST };

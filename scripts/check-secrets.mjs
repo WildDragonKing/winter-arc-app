@@ -14,16 +14,78 @@ const IGNORED_DIRECTORIES = new Set([
 const MAX_FILE_BYTES = 1024 * 1024; // 1MB safety cap
 
 const SECRET_PATTERNS = [
-  { id: 'rsa-private-key', regex: /-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----/ },
-  { id: 'generic-private-key', regex: /-----BEGIN PRIVATE KEY-----/ },
-  { id: 'aws-access-key', regex: /AKIA[0-9A-Z]{16}/ },
-  { id: 'aws-secret-key', regex: /(?<![A-Z0-9])[A-Za-z0-9\/+]{40}(?![A-Z0-9])/ },
-  { id: 'google-api-key', regex: /AIza[0-9A-Za-z\-_]{35}/ },
-  { id: 'slack-token', regex: /xox[baprs]-[0-9A-Za-z\-]{10,48}/ },
-  { id: 'github-token', regex: /gh[pousr]_[0-9A-Za-z]{36}/ },
-  { id: 'heroku-api-key', regex: /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/ },
-  { id: 'google-client-secret', regex: /[0-9A-Za-z-_]{24}\.[0-9A-Za-z-_]{6}\.[0-9A-Za-z-_]{27}/ },
-  { id: 'potential-password', regex: /password\s*[:=]\s*['\"][^'"\n]{6,}['\"]/i },
+  {
+    id: 'rsa-private-key',
+    test(content) {
+      const blockPattern = /-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----([\s\S]+?)-----END \1 PRIVATE KEY-----/g;
+      for (const match of content.matchAll(blockPattern)) {
+        const body = match[2]?.replace(/\s+/g, '') ?? '';
+        if (body.length >= 80 && /^[A-Za-z0-9+/=]+$/.test(body)) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+  {
+    id: 'generic-private-key',
+    test(content) {
+      const blockPattern = /-----BEGIN PRIVATE KEY-----([\s\S]+?)-----END PRIVATE KEY-----/g;
+      for (const match of content.matchAll(blockPattern)) {
+        const body = match[1]?.replace(/\s+/g, '') ?? '';
+        if (body.length >= 80 && /^[A-Za-z0-9+/=]+$/.test(body)) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+  { id: 'aws-access-key', test: (content) => /AKIA[0-9A-Z]{16}/.test(content) },
+  {
+    id: 'aws-secret-key',
+    test(content) {
+      const candidatePattern = /(?<![A-Za-z0-9/+])[A-Za-z0-9/+]{40}(?![A-Za-z0-9/+])/g;
+      for (const match of content.matchAll(candidatePattern)) {
+        const value = match[0];
+        if (/[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value)) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+  { id: 'google-api-key', test: (content) => /AIza[0-9A-Za-z\-_]{35}/.test(content) },
+  { id: 'slack-token', test: (content) => /xox[baprs]-[0-9A-Za-z\-]{10,48}/.test(content) },
+  { id: 'github-token', test: (content) => /gh[pousr]_[0-9A-Za-z]{36}/.test(content) },
+  {
+    id: 'heroku-api-key',
+    test(content) {
+      const candidatePattern = /[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}/g;
+      for (const match of content.matchAll(candidatePattern)) {
+        const index = match.index ?? 0;
+        const prefix = content.slice(Math.max(0, index - 24), index);
+        const normalized = prefix.replace(/\s+/g, '').toLowerCase();
+        if (
+          normalized.endsWith('"id":"') ||
+          normalized.endsWith('"previd":"') ||
+          normalized.endsWith('"nextid":"') ||
+          normalized.endsWith('"migrationid":"')
+        ) {
+          continue;
+        }
+        return true;
+      }
+      return false;
+    },
+  },
+  {
+    id: 'google-client-secret',
+    test: (content) => /[0-9A-Za-z-_]{24}\.[0-9A-Za-z-_]{6}\.[0-9A-Za-z-_]{27}/.test(content),
+  },
+  {
+    id: 'potential-password',
+    test: (content) => /password\s*[:=]\s*['\"][^'"\n]{6,}['\"]/i.test(content),
+  },
 ];
 
 const TEXT_ENCODINGS = ['utf8', 'utf16le', 'latin1'];
@@ -79,7 +141,7 @@ async function scanFile(filePath) {
   }
   const matches = [];
   for (const pattern of SECRET_PATTERNS) {
-    if (pattern.regex.test(content)) {
+    if (pattern.test(content)) {
       matches.push(pattern.id);
     }
   }

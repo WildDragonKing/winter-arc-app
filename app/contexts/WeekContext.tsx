@@ -153,7 +153,11 @@ export function WeekProvider({ children }: { children: ReactNode }) {
           weekOffset === 0 && isAfter(candidate, today) ? today : candidate;
         const nextDateKey = format(safeCandidate, 'yyyy-MM-dd');
         if (nextDateKey !== selectedDate) {
-          setSelectedDateState(nextDateKey);
+          // Synchronize the local selected date with the week query parameter.
+          // React hooks linter warns about state updates inside effects, but this
+          // update intentionally mirrors external URL state changes.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setSelectedDateState(() => nextDateKey);
         }
       }
     }
@@ -232,7 +236,6 @@ export function WeekProvider({ children }: { children: ReactNode }) {
   return <WeekContext.Provider value={value}>{children}</WeekContext.Provider>;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useWeekContext(): WeekContextValue {
   const context = useContext(WeekContext);
   if (!context) {

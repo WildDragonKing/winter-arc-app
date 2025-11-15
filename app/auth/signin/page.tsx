@@ -26,7 +26,7 @@ export default function SignIn() {
           {providers && Object.values(providers).map((provider: any) => (
             <button
               key={provider.name}
-              onClick={() => signIn(provider.id, { callbackUrl: '/' })}
+              onClick={() => signIn(provider.id, { callbackUrl: '/dashboard' })}
               className="w-full bg-white text-black font-semibold py-3 px-4 rounded-lg hover:bg-winter-100 transition-colors flex items-center justify-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

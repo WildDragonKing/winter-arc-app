@@ -5,7 +5,8 @@
  * Color is deterministic based on userId hash for consistency.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import type { User } from '../../types';
 
 interface UserAvatarProps {
@@ -60,39 +61,46 @@ function getInitials(nickname: string): string {
   return cleaned.slice(0, 2).toUpperCase();
 }
 
-const sizeClasses = {
-  sm: 'w-8 h-8 text-sm',
-  md: 'w-12 h-12 text-base',
-  lg: 'w-16 h-16 text-lg',
-  xl: 'w-20 h-20 text-xl',
-};
+const sizeStyles = {
+  sm: { dimension: 32, textClass: 'text-sm' },
+  md: { dimension: 48, textClass: 'text-base' },
+  lg: { dimension: 64, textClass: 'text-lg' },
+  xl: { dimension: 80, textClass: 'text-xl' },
+} as const;
 
 export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProps) {
   const initials = useMemo(() => getInitials(user.nickname), [user.nickname]);
   const backgroundColor = useMemo(() => hashStringToColor(user.id), [user.id]);
+  const [imageError, setImageError] = useState(false);
+  const { dimension, textClass } = sizeStyles[size];
 
   // If user has photo URL, show image
-  if (user.photoURL) {
+  if (user.photoURL && !imageError) {
     return (
-      <img
-        src={user.photoURL}
-        alt={user.nickname || 'User'}
-        referrerPolicy="no-referrer"
-        className={`${sizeClasses[size]} rounded-full border-2 border-white/20 object-cover ${className}`}
-        onError={(e) => {
-          // Fallback to initials if image fails to load
-          (e.target as HTMLImageElement).style.display = 'none';
-        }}
-      />
+      <div
+        className={`relative overflow-hidden rounded-full border-2 border-white/20 ${className}`}
+        style={{ width: dimension, height: dimension }}
+        aria-label={`${user.nickname || 'User'}'s avatar`}
+      >
+        <Image
+          src={user.photoURL}
+          alt={user.nickname || 'User'}
+          fill
+          sizes={`${dimension}px`}
+          className="object-cover"
+          onError={() => setImageError(true)}
+          referrerPolicy="no-referrer"
+        />
+      </div>
     );
   }
 
   // Show initials with colored background
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold text-white ${className}`}
-      style={{ backgroundColor }}
-      aria-label={`${user.nickname}'s avatar`}
+      className={`flex items-center justify-center rounded-full font-semibold text-white ${textClass} ${className}`}
+      style={{ backgroundColor, width: dimension, height: dimension }}
+      aria-label={`${user.nickname || 'User'}'s avatar`}
     >
       {initials}
     </div>

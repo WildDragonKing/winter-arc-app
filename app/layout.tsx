@@ -1,10 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { Telemetry } from './components/Telemetry';
 import { ThemeProvider } from '@/app/contexts/ThemeContext';
 import { PWARegister } from './components/PWARegister';
-import { getCurrentUser } from './lib/getCurrentUser';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -12,8 +11,6 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Winter Arc - Fitness Tracker',
   description: 'Progressive Web App für Fitness Tracking',
-  themeColor: '#0f172a',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -28,13 +25,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0f172a',
+};
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const authState = await getCurrentUser();
-
   return (
     <html lang="de" suppressHydrationWarning>
       <body className={inter.className}>
@@ -43,14 +46,6 @@ export default async function RootLayout({
             {children}
           </AuthProvider>
         </ThemeProvider>
-        <AuthProvider
-          session={authState.session}
-          status={authState.status}
-          user={authState.user}
-          isOnboarded={authState.isOnboarded}
-        >
-          {children}
-        </AuthProvider>
         <PWARegister />
         <Telemetry />
       </body>

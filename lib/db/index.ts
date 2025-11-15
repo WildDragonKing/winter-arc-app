@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
+import { logger } from '@/app/utils/logger';
 import * as schema from './schema';
 
 // fetchConnectionCache deprecated (now always true); removed explicit set
@@ -16,15 +17,15 @@ export const db = sql ? drizzle(sql, { schema }) : null;
 // Connection test function
 export async function testConnection() {
   if (!sql) {
-    console.warn('No database connection available');
+    logger.warn('No database connection available');
     return false;
   }
   try {
     const result = await sql`SELECT NOW()`;
-    console.log('Neon database connected successfully:', result[0]);
+    logger.info('Neon database connected successfully:', result[0]);
     return true;
   } catch (error) {
-    console.error('Neon database connection failed:', error);
+    logger.error('Neon database connection failed:', error);
     return false;
   }
 }
@@ -32,7 +33,7 @@ export async function testConnection() {
 // Migration helper functions
 export async function runMigrations() {
   if (!sql) {
-    console.warn('No database connection available for migrations');
+    logger.warn('No database connection available for migrations');
     return false;
   }
   try {
@@ -87,10 +88,10 @@ export async function runMigrations() {
     await sql`CREATE INDEX IF NOT EXISTS group_code_idx ON groups(code);`;
     await sql`CREATE INDEX IF NOT EXISTS tracking_user_date_idx ON tracking_entries(user_id, date);`;
 
-    console.log('Neon database migrations completed successfully');
+    logger.info('Neon database migrations completed successfully');
     return true;
   } catch (error) {
-    console.error('Neon migration failed:', error);
+    logger.error('Neon migration failed:', error);
     return false;
   }
 }

@@ -10,7 +10,7 @@
 
 ## 1. Incident Summary
 
-A Google API key (`AIzaSyCw2mlvqyoKOlr-SmL6l2ZNxr-E0PRWM0E`) associated with the Firebase project `gen-lang-client-0429587720` was found exposed in public GitHub repository build artifacts:
+A Google API key (`AIzaSyCw2mlvqyoKOlr-SmL6l2ZNxr-E0PRW***`) associated with the Firebase project `gen-lang-client-0429587720` was found exposed in public GitHub repository build artifacts:
 
 - **Primary Location**: `https://github.com/NewRealm-Projects/winter-arc-app-staging/blob/ec3b12b8ee21915cedb7ca1a5b11c996276cdaf1/assets/NotesPage-Bk5UZSYr.js`
 - **Additional Locations**: Multiple JavaScript bundle files in the repository
@@ -31,7 +31,7 @@ Build artifacts (`dist/` directory) containing bundled environment variables wer
    https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0429587720
 
    # Steps:
-   # 1. Find API key: AIzaSyCw2mlvqyoKOlr-SmL6l2ZNxr-E0PRWM0E
+   # 1. Find API key: AIzaSyCw2mlvqyoKOlr-SmL6l2ZNxr-E0PRW***
    # 2. Click "Delete" or "Regenerate"
    # 3. Create a new API key with restrictions (see section 3)
    ```

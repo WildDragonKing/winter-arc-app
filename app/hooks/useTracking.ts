@@ -70,8 +70,8 @@ export function useTracking() {
       });
       try {
         navigator.sendBeacon('/api/tracking/bulk', JSON.stringify(payload));
-      } catch (e) {
-        // Fallback: synchronous POST for each date
+      } catch (error) {
+        console.error('Failed to flush tracking updates via sendBeacon:', error);
         changedDatesRef.current.forEach(date => {
           const data = tracking[date];
           if (!data) return;

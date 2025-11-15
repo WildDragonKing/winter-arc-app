@@ -229,7 +229,7 @@ describe('PresetButton', () => {
     });
 
     it('should apply active styles on interaction', async () => {
-      const user = userEvent.setup();
+      const _user = userEvent.setup();
       const { container } = render(<PresetButton preset={defaultPreset} onClick={vi.fn()} />);
       
       const button = container.querySelector('button');

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### � Planned
-- Noch keine neuen Änderungen nach `0.1.3` geplant. Bitte neue Features über OpenSpec Change Proposal einreichen.
+- Noch keine neuen Änderungen nach `0.1.3` geplant.
 
 ---
 

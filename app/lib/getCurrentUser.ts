@@ -13,8 +13,20 @@ export interface SerializedUser extends Omit<User, 'createdAt' | 'pushupState' |
   enabledActivities: Activity[];
 }
 
+export interface SerializedSession {
+  user: {
+    id?: string | null;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    nickname?: string | null;
+    groupCode?: string | null;
+  };
+  expires: string;
+}
+
 export interface AuthHydration {
-  session: Session | null;
+  session: SerializedSession | null;
   user: SerializedUser | null;
   status: AuthStatus;
   isOnboarded: boolean;
@@ -32,6 +44,26 @@ function deriveNickname(email?: string | null, fallback?: string | null) {
   }
   const [name] = email.split('@');
   return name ?? '';
+}
+
+/**
+ * Serializes a NextAuth session object to remove non-serializable data.
+ * This prevents "TypeError: X is not a function" errors when passing to client components.
+ */
+function serializeSession(session: Session | null): SerializedSession | null {
+  if (!session) return null;
+
+  return {
+    user: {
+      id: session.user?.id ?? null,
+      name: session.user?.name ?? null,
+      email: session.user?.email ?? null,
+      image: session.user?.image ?? null,
+      nickname: session.user?.nickname ?? null,
+      groupCode: session.user?.groupCode ?? null,
+    },
+    expires: session.expires,
+  };
 }
 
 function mapUserRecordToSerialized({
@@ -74,7 +106,7 @@ export async function getCurrentUser(): Promise<AuthHydration> {
 
   if (!session?.user?.id) {
     return {
-      session: session ?? null,
+      session: serializeSession(session),
       user: null,
       status: 'unauthenticated',
       isOnboarded: false,
@@ -86,7 +118,7 @@ export async function getCurrentUser(): Promise<AuthHydration> {
   if (!db) {
     const fallback = mapUserRecordToSerialized({ record: undefined, session });
     return {
-      session,
+      session: serializeSession(session),
       user: fallback,
       status: 'authenticated',
       isOnboarded: Boolean(fallback.birthday),
@@ -104,7 +136,7 @@ export async function getCurrentUser(): Promise<AuthHydration> {
     const user = mapUserRecordToSerialized({ record, session });
 
     return {
-      session,
+      session: serializeSession(session),
       user,
       status: 'authenticated',
       isOnboarded: Boolean(user.birthday),
@@ -113,7 +145,7 @@ export async function getCurrentUser(): Promise<AuthHydration> {
     console.error('Failed to load current user', error);
     const fallback = mapUserRecordToSerialized({ record: undefined, session });
     return {
-      session,
+      session: serializeSession(session),
       user: fallback,
       status: 'authenticated',
       isOnboarded: Boolean(fallback.birthday),

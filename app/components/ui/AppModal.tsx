@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type ReactNode, type MouseEvent } from 'react';
+import { useCallback, useEffect, useId, useRef, type ReactNode, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 
 /**
@@ -70,7 +70,7 @@ export function AppModal({
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
-  const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 9)}`);
+  const titleId = useId();
   const hasInitiallyFocused = useRef(false);
 
   // Body scroll lock
@@ -154,7 +154,7 @@ export function AppModal({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, initialFocusRef]);
 
   // Separate effect for focus restoration on close
   useEffect(() => {
@@ -197,7 +197,7 @@ export function AppModal({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? titleId.current : undefined}
+        aria-labelledby={title ? titleId : undefined}
         className={`w-full ${SIZE_CLASSES[size]} max-h-[90vh] rounded-2xl p-6 shadow-2xl animate-scale-fade-in focus:outline-none`}
         style={{
           zIndex: 'var(--z-modal)',
@@ -221,7 +221,7 @@ export function AppModal({
               <div className="flex-1">
                 {title && (
                   <h2
-                    id={titleId.current}
+                    id={titleId}
                     className="text-lg font-semibold text-gray-900 dark:text-gray-100"
                   >
                     {title}

@@ -52,6 +52,10 @@ function AuthErrorContent() {
   )
 }
 
+// Route segment config to force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
 export default function AuthError() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-winter-900 to-winter-800 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>

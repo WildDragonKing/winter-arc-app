@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(npm run format:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run test:unit:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nchore: consolidate to single instruction file, remove OpenSpec and legacy code\n\nMAJOR CHANGES:\n- Remove openspec/ directory (120+ files) and npm dependency\n- Remove legacy stub services (firebase.ts, checkin.ts, migration.ts)\n- Remove legacy test files for stubs\n- Archive DATABASE-MIGRATION.md to docs/archive/\n- Consolidate claude.md as Single Source of Truth for all AI assistants\n- Update .github/copilot-instructions.md to sync with claude.md\n- Remove Next.js version mismatch (15 → 16)\n- Remove NEXT_PUBLIC_ENABLE_CHECKINS feature flag from docs\n- Remove Firebase/Vite migration language (migrations complete)\n\nDOCUMENTATION:\n- Rewrite claude.md: 15 comprehensive sections (796 lines)\n  - Updated technology stack (all versions correct)\n  - Removed migration-era commentary\n  - Added Dependency Policy section\n  - Added Security First Policy (PRIO #1)\n  - Added Deployment Environments section\n  - Clear, current project status\n- Add synchronization notes to both instruction files\n- Ensure both files stay in sync (detailed vs quick-ref)\n\nCLEANUP:\n- .env.example: remove NEXT_PUBLIC_ENABLE_CHECKINS\n- package.json: remove openspec dependency\n- CHANGELOG.md: remove OpenSpec reference\n- docs/development-guidelines.md: remove OpenSpec + ENABLE_CHECKINS\n\nVALIDATION:\n- npm run lint: ✅ PASS\n- npm run format: ✅ PASS\n- npm run typecheck: Pre-existing failures only (not from these changes)\n- npm run test:unit: Pre-existing failures only (not from these changes)\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(cat:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next-auth@4.24.13:*)",
+      "Bash(npm run vercel:build:*)",
+      "Bash(find:*)",
+      "Bash(taskkill:*)",
+      "Bash(npx eslint:*)",
+      "Bash(test:*)",
+      "Bash(npm run docs:check:*)",
+      "Bash(npm run lint:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

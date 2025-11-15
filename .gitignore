@@ -17,6 +17,7 @@ dist-ssr
 # Next.js
 .next/
 out/
+.vercel/
 
 # Editor directories and files
 .vscode/*
@@ -46,6 +47,9 @@ scripts/serviceaccountkey.json
 
 # Package lock files - let each environment use its own registry configuration
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
 
 # Build sourcemaps that may contain secrets from production builds
 .smap/

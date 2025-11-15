@@ -44,7 +44,7 @@ export default function OnboardingPage() {
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">❄️</div>
           <h1 className="text-white text-2xl font-bold mb-2">Welcome to Winter Arc</h1>
-          <p className="text-winter-200">Let's set up your profile</p>
+          <p className="text-winter-200">Let&apos;s set up your profile</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

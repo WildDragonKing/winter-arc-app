@@ -1,7 +1,8 @@
 import next from 'eslint-config-next';
+import reactRefresh from 'eslint-plugin-react-refresh';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-export default [
+const config = [
   {
     ignores: [
       '.next/**',
@@ -16,6 +17,7 @@ export default [
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
       'unused-imports': unusedImports,
+      'react-refresh': reactRefresh,
     },
     rules: {
       'no-console': ['error', { allow: ['warn', 'error'] }],
@@ -31,3 +33,5 @@ export default [
     },
   },
 ];
+
+export default config;

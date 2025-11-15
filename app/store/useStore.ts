@@ -99,7 +99,7 @@ export const useStore = create<AppState>((set) => ({
       };
     }),
 
-  authLoading: true,
+  authLoading: false,
   setAuthLoading: (loading) => set({ authLoading: loading }),
 
   tracking: {},

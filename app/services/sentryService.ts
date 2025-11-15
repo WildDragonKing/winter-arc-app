@@ -42,7 +42,7 @@ export function initializeSentry(config?: Partial<SentryConfig>): boolean {
   const suppressionReason = getTelemetrySuppressionReason();
 
   if (suppressionReason && config?.enabled !== true) {
-    console.info(`[Sentry] Telemetry disabled (${suppressionReason})`);
+    console.warn(`[Sentry] Telemetry disabled (${suppressionReason})`);
     return false;
   }
 

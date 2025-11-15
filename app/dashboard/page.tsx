@@ -1,9 +1,9 @@
 'use client';
 
 import { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '../store/useStore';
 import { useAuth } from '../hooks/useAuth';
-import { useRouter } from 'next/navigation';
 import Layout from '../components/Layout';
 import PushupTile from '../components/PushupTile';
 import WeightTile from '../components/WeightTile';
@@ -26,32 +26,32 @@ function LoadingScreen() {
 }
 
 function DashboardContent() {
-  const { status, user, isOnboarded } = useAuth();
-
-  if (status === 'unauthenticated' || !user) {
-    redirect('/auth/signin');
-  }
   const router = useRouter();
-  const user = useStore((state) => state.user);
-  const isOnboarded = useStore((state) => state.isOnboarded);
+  const { status, user: authUser, isOnboarded: authIsOnboarded } = useAuth();
+  const storeUser = useStore((state) => state.user);
+  const storeIsOnboarded = useStore((state) => state.isOnboarded);
   const authLoading = useStore((state) => state.authLoading);
 
+  const effectiveUser = storeUser ?? authUser;
+  const effectiveIsOnboarded = storeUser ? storeIsOnboarded : authIsOnboarded;
+
   useEffect(() => {
-    if (authLoading) {
-      return;
-    }
-
-    if (!user) {
+    if (status === 'unauthenticated') {
       router.replace('/auth/signin');
+    }
+  }, [router, status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated' || !effectiveUser) {
       return;
     }
 
-    if (!isOnboarded) {
+    if (!effectiveIsOnboarded) {
       router.replace('/onboarding');
     }
-  }, [authLoading, isOnboarded, router, user]);
+  }, [effectiveIsOnboarded, effectiveUser, router, status]);
 
-  if (authLoading || !user || !isOnboarded) {
+  if (authLoading || !effectiveUser || !effectiveIsOnboarded) {
     return <LoadingScreen />;
   }
 
@@ -104,8 +104,9 @@ export default function DashboardPage() {
         </div>
       }
     >
-    <Suspense fallback={<LoadingScreen />}>
-      <DashboardContent />
+      <Suspense fallback={<LoadingScreen />}>
+        <DashboardContent />
+      </Suspense>
     </Suspense>
   );
 }
